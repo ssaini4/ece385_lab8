@@ -1,5 +1,5 @@
 Flow report for lab8
-Wed Oct 19 02:13:14 2016
+Wed Oct 19 15:25:54 2016
 Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Full Version
 
 
@@ -41,17 +41,17 @@ agreement for further details.
 +----------------------------------------------------------------------------------+
 ; Flow Summary                                                                     ;
 +------------------------------------+---------------------------------------------+
-; Flow Status                        ; Successful - Wed Oct 19 02:13:07 2016       ;
+; Flow Status                        ; Successful - Wed Oct 19 15:25:48 2016       ;
 ; Quartus II 64-Bit Version          ; 15.0.0 Build 145 04/22/2015 SJ Full Version ;
 ; Revision Name                      ; lab8                                        ;
 ; Top-level Entity Name              ; lab8                                        ;
 ; Family                             ; Cyclone IV E                                ;
 ; Device                             ; EP4CE115F29C7                               ;
 ; Timing Models                      ; Final                                       ;
-; Total logic elements               ; 3,020 / 114,480 ( 3 % )                     ;
-;     Total combinational functions  ; 2,375 / 114,480 ( 2 % )                     ;
-;     Dedicated logic registers      ; 2,066 / 114,480 ( 2 % )                     ;
-; Total registers                    ; 2184                                        ;
+; Total logic elements               ; 3,078 / 114,480 ( 3 % )                     ;
+;     Total combinational functions  ; 2,416 / 114,480 ( 2 % )                     ;
+;     Dedicated logic registers      ; 2,076 / 114,480 ( 2 % )                     ;
+; Total registers                    ; 2195                                        ;
 ; Total pins                         ; 128 / 529 ( 24 % )                          ;
 ; Total virtual pins                 ; 0                                           ;
 ; Total memory bits                  ; 11,392 / 3,981,312 ( < 1 % )                ;
@@ -65,36 +65,36 @@ agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 10/19/2016 02:11:57 ;
+; Start date & time ; 10/19/2016 15:24:47 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; lab8                ;
 +-------------------+---------------------+
 
 
-+----------------------------------------------------------------------------------------------------------------------------------------------------+
-; Flow Non-Default Global Settings                                                                                                                   ;
-+-------------------------------------+---------------------------------------------------------------+---------------+-----------------+------------+
-; Assignment Name                     ; Value                                                         ; Default Value ; Entity Name     ; Section Id ;
-+-------------------------------------+---------------------------------------------------------------+---------------+-----------------+------------+
-; COMPILER_SIGNATURE_ID               ; 71094330539532.147686111710536                                ; --            ; --              ; --         ;
-; MAX_CORE_JUNCTION_TEMP              ; 85                                                            ; --            ; --              ; --         ;
-; MIN_CORE_JUNCTION_TEMP              ; 0                                                             ; --            ; --              ; --         ;
-; MISC_FILE                           ; nios_system/synthesis/../nios_system.cmp                      ; --            ; --              ; --         ;
-; MISC_FILE                           ; nios_system/synthesis/../../nios_system.qsys                  ; --            ; --              ; --         ;
-; PARTITION_COLOR                     ; 16764057                                                      ; --            ; DE2_115_Default ; Top        ;
-; PARTITION_COLOR                     ; 16764057                                                      ; --            ; --              ; Top        ;
-; PARTITION_FITTER_PRESERVATION_LEVEL ; PLACEMENT_AND_ROUTING                                         ; --            ; DE2_115_Default ; Top        ;
-; PARTITION_FITTER_PRESERVATION_LEVEL ; PLACEMENT_AND_ROUTING                                         ; --            ; --              ; Top        ;
-; PARTITION_NETLIST_TYPE              ; SOURCE                                                        ; --            ; DE2_115_Default ; Top        ;
-; PARTITION_NETLIST_TYPE              ; SOURCE                                                        ; --            ; --              ; Top        ;
-; POWER_BOARD_THERMAL_MODEL           ; None (CONSERVATIVE)                                           ; --            ; --              ; --         ;
-; POWER_PRESET_COOLING_SOLUTION       ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                         ; --            ; --              ; --         ;
-; SLD_FILE                            ; nios_system/synthesis/nios_system.regmap                      ; --            ; --              ; --         ;
-; SLD_FILE                            ; nios_system/synthesis/nios_system.debuginfo                   ; --            ; --              ; --         ;
-; SLD_INFO                            ; QSYS_NAME nios_system HAS_SOPCINFO 1 GENERATION_ID 1476856886 ; --            ; nios_system     ; --         ;
-; SOPCINFO_FILE                       ; nios_system/synthesis/../../nios_system.sopcinfo              ; --            ; --              ; --         ;
-; SYNTHESIS_ONLY_QIP                  ; On                                                            ; --            ; --              ; --         ;
-+-------------------------------------+---------------------------------------------------------------+---------------+-----------------+------------+
++-------------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                                ;
++-------------------------------------+------------------------------------------------------------+---------------+-----------------+------------+
+; Assignment Name                     ; Value                                                      ; Default Value ; Entity Name     ; Section Id ;
++-------------------------------------+------------------------------------------------------------+---------------+-----------------+------------+
+; COMPILER_SIGNATURE_ID               ; 71094329375042.147690868710016                             ; --            ; --              ; --         ;
+; MAX_CORE_JUNCTION_TEMP              ; 85                                                         ; --            ; --              ; --         ;
+; MIN_CORE_JUNCTION_TEMP              ; 0                                                          ; --            ; --              ; --         ;
+; MISC_FILE                           ; lab7_soc/synthesis/../lab7_soc.cmp                         ; --            ; --              ; --         ;
+; MISC_FILE                           ; lab7_soc/synthesis/../../lab7_soc.qsys                     ; --            ; --              ; --         ;
+; PARTITION_COLOR                     ; 16764057                                                   ; --            ; DE2_115_Default ; Top        ;
+; PARTITION_COLOR                     ; 16764057                                                   ; --            ; --              ; Top        ;
+; PARTITION_FITTER_PRESERVATION_LEVEL ; PLACEMENT_AND_ROUTING                                      ; --            ; DE2_115_Default ; Top        ;
+; PARTITION_FITTER_PRESERVATION_LEVEL ; PLACEMENT_AND_ROUTING                                      ; --            ; --              ; Top        ;
+; PARTITION_NETLIST_TYPE              ; SOURCE                                                     ; --            ; DE2_115_Default ; Top        ;
+; PARTITION_NETLIST_TYPE              ; SOURCE                                                     ; --            ; --              ; Top        ;
+; POWER_BOARD_THERMAL_MODEL           ; None (CONSERVATIVE)                                        ; --            ; --              ; --         ;
+; POWER_PRESET_COOLING_SOLUTION       ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                      ; --            ; --              ; --         ;
+; SLD_FILE                            ; lab7_soc/synthesis/lab7_soc.regmap                         ; --            ; --              ; --         ;
+; SLD_FILE                            ; lab7_soc/synthesis/lab7_soc.debuginfo                      ; --            ; --              ; --         ;
+; SLD_INFO                            ; QSYS_NAME lab7_soc HAS_SOPCINFO 1 GENERATION_ID 1476908497 ; --            ; lab7_soc        ; --         ;
+; SOPCINFO_FILE                       ; lab7_soc/synthesis/../../lab7_soc.sopcinfo                 ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                  ; On                                                         ; --            ; --              ; --         ;
++-------------------------------------+------------------------------------------------------------+---------------+-----------------+------------+
 
 
 +-------------------------------------------------------------------------------------------------------------------------------+
@@ -102,11 +102,11 @@ agreement for further details.
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name               ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis      ; 00:00:33     ; 1.0                     ; 844 MB              ; 00:00:57                           ;
-; Fitter                    ; 00:00:25     ; 1.4                     ; 1677 MB             ; 00:00:29                           ;
-; Assembler                 ; 00:00:05     ; 1.0                     ; 627 MB              ; 00:00:04                           ;
-; TimeQuest Timing Analyzer ; 00:00:04     ; 1.0                     ; 833 MB              ; 00:00:04                           ;
-; Total                     ; 00:01:07     ; --                      ; --                  ; 00:01:34                           ;
+; Analysis & Synthesis      ; 00:00:29     ; 1.0                     ; 852 MB              ; 00:00:56                           ;
+; Fitter                    ; 00:00:20     ; 1.1                     ; 1664 MB             ; 00:00:26                           ;
+; Assembler                 ; 00:00:05     ; 1.0                     ; 632 MB              ; 00:00:04                           ;
+; TimeQuest Timing Analyzer ; 00:00:04     ; 1.0                     ; 838 MB              ; 00:00:04                           ;
+; Total                     ; 00:00:58     ; --                      ; --                  ; 00:01:30                           ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
@@ -115,10 +115,10 @@ agreement for further details.
 +---------------------------+------------------+-----------+------------+----------------+
 ; Module Name               ; Machine Hostname ; OS Name   ; OS Version ; Processor type ;
 +---------------------------+------------------+-----------+------------+----------------+
-; Analysis & Synthesis      ; ECEB-3022-10     ; Windows 7 ; 6.1        ; x86_64         ;
-; Fitter                    ; ECEB-3022-10     ; Windows 7 ; 6.1        ; x86_64         ;
-; Assembler                 ; ECEB-3022-10     ; Windows 7 ; 6.1        ; x86_64         ;
-; TimeQuest Timing Analyzer ; ECEB-3022-10     ; Windows 7 ; 6.1        ; x86_64         ;
+; Analysis & Synthesis      ; ECEB-3022-01     ; Windows 7 ; 6.1        ; x86_64         ;
+; Fitter                    ; ECEB-3022-01     ; Windows 7 ; 6.1        ; x86_64         ;
+; Assembler                 ; ECEB-3022-01     ; Windows 7 ; 6.1        ; x86_64         ;
+; TimeQuest Timing Analyzer ; ECEB-3022-01     ; Windows 7 ; 6.1        ; x86_64         ;
 +---------------------------+------------------+-----------+------------+----------------+
 
 
