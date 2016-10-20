@@ -1,4 +1,4 @@
-// (C) 2001-2015 Altera Corporation. All rights reserved.
+// (C) 2001-2014 Altera Corporation. All rights reserved.
 // Your use of Altera Corporation's design tools, logic functions and other 
 // software and tools, and its AMPP partner logic functions, and any output 
 // files any of the foregoing (including device programming or simulation 
@@ -24,9 +24,9 @@
 // agreement for further details.
 
 
-// $Id: //acds/rel/15.0/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
+// $Id: //acds/rel/14.0/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
 // $Revision: #1 $
-// $Date: 2015/02/08 $
+// $Date: 2014/02/16 $
 // $Author: swbranch $
 
 // -------------------------------------------------------
@@ -50,32 +50,34 @@ module nios_system_mm_interconnect_0_router_002_default_decode
                DEFAULT_DESTID = 0 
    )
   (output [93 - 90 : 0] default_destination_id,
-   output [12-1 : 0] default_wr_channel,
-   output [12-1 : 0] default_rd_channel,
-   output [12-1 : 0] default_src_channel
+   output [13-1 : 0] default_wr_channel,
+   output [13-1 : 0] default_rd_channel,
+   output [13-1 : 0] default_src_channel
   );
 
   assign default_destination_id = 
     DEFAULT_DESTID[93 - 90 : 0];
 
-  generate
-    if (DEFAULT_CHANNEL == -1) begin : no_default_channel_assignment
+  generate begin : default_decode
+    if (DEFAULT_CHANNEL == -1) begin
       assign default_src_channel = '0;
     end
-    else begin : default_channel_assignment
-      assign default_src_channel = 12'b1 << DEFAULT_CHANNEL;
+    else begin
+      assign default_src_channel = 13'b1 << DEFAULT_CHANNEL;
     end
+  end
   endgenerate
 
-  generate
-    if (DEFAULT_RD_CHANNEL == -1) begin : no_default_rw_channel_assignment
+  generate begin : default_decode_rw
+    if (DEFAULT_RD_CHANNEL == -1) begin
       assign default_wr_channel = '0;
       assign default_rd_channel = '0;
     end
-    else begin : default_rw_channel_assignment
-      assign default_wr_channel = 12'b1 << DEFAULT_WR_CHANNEL;
-      assign default_rd_channel = 12'b1 << DEFAULT_RD_CHANNEL;
+    else begin
+      assign default_wr_channel = 13'b1 << DEFAULT_WR_CHANNEL;
+      assign default_rd_channel = 13'b1 << DEFAULT_RD_CHANNEL;
     end
+  end
   endgenerate
 
 endmodule
@@ -103,7 +105,7 @@ module nios_system_mm_interconnect_0_router_002
     // -------------------
     output                          src_valid,
     output reg [107-1    : 0] src_data,
-    output reg [12-1 : 0] src_channel,
+    output reg [13-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
     input                           src_ready
@@ -119,7 +121,7 @@ module nios_system_mm_interconnect_0_router_002
     localparam PKT_PROTECTION_H = 97;
     localparam PKT_PROTECTION_L = 95;
     localparam ST_DATA_W = 107;
-    localparam ST_CHANNEL_W = 12;
+    localparam ST_CHANNEL_W = 13;
     localparam DECODER_TYPE = 1;
 
     localparam PKT_TRANS_WRITE = 67;
@@ -158,11 +160,16 @@ module nios_system_mm_interconnect_0_router_002
     assign src_valid         = sink_valid;
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
-    wire [12-1 : 0] default_src_channel;
+    wire [13-1 : 0] default_src_channel;
 
 
 
 
+    // -------------------------------------------------------
+    // Write and read transaction signals
+    // -------------------------------------------------------
+    wire read_transaction;
+    assign read_transaction  = sink_data[PKT_TRANS_READ];
 
 
     nios_system_mm_interconnect_0_router_002_default_decode the_default_decode(
@@ -185,7 +192,11 @@ module nios_system_mm_interconnect_0_router_002
 
 
         if (destid == 0 ) begin
-            src_channel = 12'b1;
+            src_channel = 13'b01;
+        end
+
+        if (destid == 1  && read_transaction) begin
+            src_channel = 13'b10;
         end
 
 

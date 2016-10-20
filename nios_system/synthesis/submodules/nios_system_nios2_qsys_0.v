@@ -1,4 +1,4 @@
-//Legal Notice: (C)2016 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2015 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -509,9 +509,6 @@ defparam nios_system_nios2_qsys_0_ociram_sp_ram.lpm_file = "nios_system_nios2_qs
 defparam nios_system_nios2_qsys_0_ociram_sp_ram.lpm_file = "nios_system_nios2_qsys_0_ociram_default_contents.hex";
 `endif
 //synthesis translate_on
-//synthesis read_comments_as_HDL on
-//defparam nios_system_nios2_qsys_0_ociram_sp_ram.lpm_file = "nios_system_nios2_qsys_0_ociram_default_contents.mif";
-//synthesis read_comments_as_HDL off
   assign cfgrom_readdata = (MonAReg[4 : 2] == 3'd0)? 32'h10000020 :
     (MonAReg[4 : 2] == 3'd1)? 32'h00001d1d :
     (MonAReg[4 : 2] == 3'd2)? 32'h00040000 :
@@ -2457,60 +2454,18 @@ endmodule
 
 module nios_system_nios2_qsys_0_nios2_oci_pib (
                                                 // inputs:
-                                                 clk,
-                                                 clkx2,
-                                                 jrst_n,
                                                  tw,
 
                                                 // outputs:
-                                                 tr_clk,
                                                  tr_data
                                               )
 ;
 
-  output           tr_clk;
-  output  [ 17: 0] tr_data;
-  input            clk;
-  input            clkx2;
-  input            jrst_n;
+  output  [ 35: 0] tr_data;
   input   [ 35: 0] tw;
 
-  wire             phase;
-  wire             tr_clk;
-  reg              tr_clk_reg /* synthesis ALTERA_ATTRIBUTE = "SUPPRESS_DA_RULE_INTERNAL=R101"  */;
-  wire    [ 17: 0] tr_data;
-  reg     [ 17: 0] tr_data_reg /* synthesis ALTERA_ATTRIBUTE = "SUPPRESS_DA_RULE_INTERNAL=R101"  */;
-  reg              x1 /* synthesis ALTERA_ATTRIBUTE = "SUPPRESS_DA_RULE_INTERNAL=R101"  */;
-  reg              x2 /* synthesis ALTERA_ATTRIBUTE = "SUPPRESS_DA_RULE_INTERNAL=R101"  */;
-  assign phase = x1^x2;
-  always @(posedge clk or negedge jrst_n)
-    begin
-      if (jrst_n == 0)
-          x1 <= 0;
-      else 
-        x1 <= ~x1;
-    end
-
-
-  always @(posedge clkx2 or negedge jrst_n)
-    begin
-      if (jrst_n == 0)
-        begin
-          x2 <= 0;
-          tr_clk_reg <= 0;
-          tr_data_reg <= 0;
-        end
-      else 
-        begin
-          x2 <= x1;
-          tr_clk_reg <= ~phase;
-          tr_data_reg <= phase ?   tw[17 : 0] :   tw[35 : 18];
-        end
-    end
-
-
-  assign tr_clk = 0 ? tr_clk_reg : 0;
-  assign tr_data = 0 ? tr_data_reg : 0;
+  wire    [ 35: 0] tr_data;
+  assign tr_data = 0 ? tw : 0;
 
 endmodule
 
@@ -2681,7 +2636,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
                                              writedata_nxt,
 
                                             // outputs:
-                                             jtag_debug_module_debugaccess_to_roms,
+                                             jtag_debug_slave_debugaccess_to_roms,
                                              oci_hbreak_req,
                                              oci_ienable,
                                              oci_single_step_mode,
@@ -2691,7 +2646,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
                                           )
 ;
 
-  output           jtag_debug_module_debugaccess_to_roms;
+  output           jtag_debug_slave_debugaccess_to_roms;
   output           oci_hbreak_req;
   output  [ 31: 0] oci_ienable;
   output           oci_single_step_mode;
@@ -2726,7 +2681,6 @@ module nios_system_nios2_qsys_0_nios2_oci (
   wire    [ 35: 0] atm;
   wire    [ 31: 0] break_readreg;
   reg     [  3: 0] byteenable;
-  wire             clkx2;
   wire    [ 28: 0] cpu_d_address;
   wire             cpu_d_read;
   wire    [ 31: 0] cpu_d_readdata;
@@ -2754,7 +2708,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
   wire    [ 35: 0] itm;
   wire    [ 37: 0] jdo;
   wire             jrst_n;
-  wire             jtag_debug_module_debugaccess_to_roms;
+  wire             jtag_debug_slave_debugaccess_to_roms;
   wire             monitor_error;
   wire             monitor_go;
   wire             monitor_ready;
@@ -2784,8 +2738,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
   wire             take_no_action_break_c;
   wire             take_no_action_ocimem_a;
   wire             take_no_action_tracemem_a;
-  wire             tr_clk;
-  wire    [ 17: 0] tr_data;
+  wire    [ 35: 0] tr_data;
   wire             tracemem_on;
   wire    [ 35: 0] tracemem_trcdata;
   wire             tracemem_tw;
@@ -3009,10 +2962,6 @@ module nios_system_nios2_qsys_0_nios2_oci (
 
   nios_system_nios2_qsys_0_nios2_oci_pib the_nios_system_nios2_qsys_0_nios2_oci_pib
     (
-      .clk     (clk),
-      .clkx2   (clkx2),
-      .jrst_n  (jrst_n),
-      .tr_clk  (tr_clk),
       .tr_data (tr_data),
       .tw      (tw)
     );
@@ -3039,7 +2988,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
     );
 
   assign trigout = dbrk_trigout | xbrk_trigout;
-  assign jtag_debug_module_debugaccess_to_roms = debugack;
+  assign jtag_debug_slave_debugaccess_to_roms = debugack;
   always @(posedge clk or negedge jrst_n)
     begin
       if (jrst_n == 0)
@@ -3103,7 +3052,7 @@ module nios_system_nios2_qsys_0_nios2_oci (
     end
 
 
-  nios_system_nios2_qsys_0_jtag_debug_module_wrapper the_nios_system_nios2_qsys_0_jtag_debug_module_wrapper
+  nios_system_nios2_qsys_0_jtag_debug_slave_wrapper the_nios_system_nios2_qsys_0_jtag_debug_slave_wrapper
     (
       .MonDReg                   (MonDReg),
       .break_readreg             (break_readreg),
@@ -3144,13 +3093,11 @@ module nios_system_nios2_qsys_0_nios2_oci (
     );
 
   //dummy sink, which is an e_mux
-  assign dummy_sink = tr_clk |
-    tr_data |
+  assign dummy_sink = tr_data |
     trigout |
     debugack;
 
   assign debugreq = 0;
-  assign clkx2 = 0;
 
 endmodule
 
@@ -3166,17 +3113,17 @@ endmodule
 module nios_system_nios2_qsys_0 (
                                   // inputs:
                                    clk,
-                                   d_irq,
                                    d_readdata,
                                    d_waitrequest,
                                    i_readdata,
                                    i_waitrequest,
-                                   jtag_debug_module_address,
-                                   jtag_debug_module_byteenable,
-                                   jtag_debug_module_debugaccess,
-                                   jtag_debug_module_read,
-                                   jtag_debug_module_write,
-                                   jtag_debug_module_writedata,
+                                   irq,
+                                   jtag_debug_slave_address,
+                                   jtag_debug_slave_byteenable,
+                                   jtag_debug_slave_debugaccess,
+                                   jtag_debug_slave_read,
+                                   jtag_debug_slave_write,
+                                   jtag_debug_slave_writedata,
                                    reset_n,
                                    reset_req,
 
@@ -3186,13 +3133,13 @@ module nios_system_nios2_qsys_0 (
                                    d_read,
                                    d_write,
                                    d_writedata,
+                                   dummy_ci_port,
                                    i_address,
                                    i_read,
-                                   jtag_debug_module_debugaccess_to_roms,
-                                   jtag_debug_module_readdata,
-                                   jtag_debug_module_resetrequest,
-                                   jtag_debug_module_waitrequest,
-                                   no_ci_readra
+                                   jtag_debug_resetrequest,
+                                   jtag_debug_slave_debugaccess_to_roms,
+                                   jtag_debug_slave_readdata,
+                                   jtag_debug_slave_waitrequest
                                 )
 ;
 
@@ -3201,29 +3148,30 @@ module nios_system_nios2_qsys_0 (
   output           d_read;
   output           d_write;
   output  [ 31: 0] d_writedata;
+  output           dummy_ci_port;
   output  [ 28: 0] i_address;
   output           i_read;
-  output           jtag_debug_module_debugaccess_to_roms;
-  output  [ 31: 0] jtag_debug_module_readdata;
-  output           jtag_debug_module_resetrequest;
-  output           jtag_debug_module_waitrequest;
-  output           no_ci_readra;
+  output           jtag_debug_resetrequest;
+  output           jtag_debug_slave_debugaccess_to_roms;
+  output  [ 31: 0] jtag_debug_slave_readdata;
+  output           jtag_debug_slave_waitrequest;
   input            clk;
-  input   [ 31: 0] d_irq;
   input   [ 31: 0] d_readdata;
   input            d_waitrequest;
   input   [ 31: 0] i_readdata;
   input            i_waitrequest;
-  input   [  8: 0] jtag_debug_module_address;
-  input   [  3: 0] jtag_debug_module_byteenable;
-  input            jtag_debug_module_debugaccess;
-  input            jtag_debug_module_read;
-  input            jtag_debug_module_write;
-  input   [ 31: 0] jtag_debug_module_writedata;
+  input   [ 31: 0] irq;
+  input   [  8: 0] jtag_debug_slave_address;
+  input   [  3: 0] jtag_debug_slave_byteenable;
+  input            jtag_debug_slave_debugaccess;
+  input            jtag_debug_slave_read;
+  input            jtag_debug_slave_write;
+  input   [ 31: 0] jtag_debug_slave_writedata;
   input            reset_n;
   input            reset_req;
 
   wire    [  1: 0] D_compare_op;
+  wire             D_ctrl_alu_force_and;
   wire             D_ctrl_alu_force_xor;
   wire             D_ctrl_alu_signed_comparison;
   wire             D_ctrl_alu_subtract;
@@ -3241,27 +3189,38 @@ module nios_system_nios2_qsys_0 (
   wire             D_ctrl_ignore_dst;
   wire             D_ctrl_implicit_dst_eretaddr;
   wire             D_ctrl_implicit_dst_retaddr;
+  wire             D_ctrl_intr_inst;
   wire             D_ctrl_jmp_direct;
   wire             D_ctrl_jmp_indirect;
   wire             D_ctrl_ld;
+  wire             D_ctrl_ld_ex;
   wire             D_ctrl_ld_io;
   wire             D_ctrl_ld_non_io;
   wire             D_ctrl_ld_signed;
+  wire             D_ctrl_ld_st_ex;
   wire             D_ctrl_logic;
-  wire             D_ctrl_rdctl_inst;
+  wire             D_ctrl_mem16;
+  wire             D_ctrl_mem32;
+  wire             D_ctrl_mem8;
+  wire             D_ctrl_rd_ctl_reg;
   wire             D_ctrl_retaddr;
   wire             D_ctrl_rot_right;
+  wire             D_ctrl_set_src2_rem_imm;
   wire             D_ctrl_shift_logical;
   wire             D_ctrl_shift_right_arith;
   wire             D_ctrl_shift_rot;
   wire             D_ctrl_shift_rot_right;
+  wire             D_ctrl_signed_imm12;
   wire             D_ctrl_src2_choose_imm;
+  wire             D_ctrl_src_imm5_shift_rot;
   wire             D_ctrl_st;
+  wire             D_ctrl_st_ex;
   wire             D_ctrl_uncond_cti_non_br;
   wire             D_ctrl_unsigned_lo_imm16;
   wire             D_ctrl_wrctl_inst;
   wire    [  4: 0] D_dst_regnum;
   wire    [ 55: 0] D_inst;
+  wire             D_is_opx_inst;
   reg     [ 31: 0] D_iw /* synthesis ALTERA_IP_DEBUG_VISIBLE = 1 */;
   wire    [  4: 0] D_iw_a;
   wire    [  4: 0] D_iw_b;
@@ -3277,8 +3236,6 @@ module nios_system_nios2_qsys_0 (
   wire    [  1: 0] D_iw_memsz;
   wire    [  5: 0] D_iw_op;
   wire    [  5: 0] D_iw_opx;
-  wire    [  4: 0] D_iw_shift_imm5;
-  wire    [  4: 0] D_iw_trap_break_imm5;
   wire    [ 26: 0] D_jmp_direct_target_waddr;
   wire    [  1: 0] D_logic_op;
   wire    [  1: 0] D_logic_op_raw;
@@ -3347,7 +3304,41 @@ module nios_system_nios2_qsys_0 (
   wire             D_op_mulxuu;
   wire             D_op_nextpc;
   wire             D_op_nor;
-  wire             D_op_opx;
+  wire             D_op_op_rsv02;
+  wire             D_op_op_rsv09;
+  wire             D_op_op_rsv10;
+  wire             D_op_op_rsv17;
+  wire             D_op_op_rsv18;
+  wire             D_op_op_rsv25;
+  wire             D_op_op_rsv26;
+  wire             D_op_op_rsv33;
+  wire             D_op_op_rsv34;
+  wire             D_op_op_rsv41;
+  wire             D_op_op_rsv42;
+  wire             D_op_op_rsv49;
+  wire             D_op_op_rsv57;
+  wire             D_op_op_rsv61;
+  wire             D_op_op_rsv62;
+  wire             D_op_op_rsv63;
+  wire             D_op_opx_rsv00;
+  wire             D_op_opx_rsv10;
+  wire             D_op_opx_rsv15;
+  wire             D_op_opx_rsv17;
+  wire             D_op_opx_rsv21;
+  wire             D_op_opx_rsv25;
+  wire             D_op_opx_rsv33;
+  wire             D_op_opx_rsv34;
+  wire             D_op_opx_rsv35;
+  wire             D_op_opx_rsv42;
+  wire             D_op_opx_rsv43;
+  wire             D_op_opx_rsv44;
+  wire             D_op_opx_rsv47;
+  wire             D_op_opx_rsv50;
+  wire             D_op_opx_rsv51;
+  wire             D_op_opx_rsv55;
+  wire             D_op_opx_rsv56;
+  wire             D_op_opx_rsv60;
+  wire             D_op_opx_rsv63;
   wire             D_op_or;
   wire             D_op_orhi;
   wire             D_op_ori;
@@ -3357,41 +3348,6 @@ module nios_system_nios2_qsys_0 (
   wire             D_op_rol;
   wire             D_op_roli;
   wire             D_op_ror;
-  wire             D_op_rsv02;
-  wire             D_op_rsv09;
-  wire             D_op_rsv10;
-  wire             D_op_rsv17;
-  wire             D_op_rsv18;
-  wire             D_op_rsv25;
-  wire             D_op_rsv26;
-  wire             D_op_rsv33;
-  wire             D_op_rsv34;
-  wire             D_op_rsv41;
-  wire             D_op_rsv42;
-  wire             D_op_rsv49;
-  wire             D_op_rsv57;
-  wire             D_op_rsv61;
-  wire             D_op_rsv62;
-  wire             D_op_rsv63;
-  wire             D_op_rsvx00;
-  wire             D_op_rsvx10;
-  wire             D_op_rsvx15;
-  wire             D_op_rsvx17;
-  wire             D_op_rsvx21;
-  wire             D_op_rsvx25;
-  wire             D_op_rsvx33;
-  wire             D_op_rsvx34;
-  wire             D_op_rsvx35;
-  wire             D_op_rsvx42;
-  wire             D_op_rsvx43;
-  wire             D_op_rsvx44;
-  wire             D_op_rsvx47;
-  wire             D_op_rsvx50;
-  wire             D_op_rsvx51;
-  wire             D_op_rsvx55;
-  wire             D_op_rsvx56;
-  wire             D_op_rsvx60;
-  wire             D_op_rsvx63;
   wire             D_op_sll;
   wire             D_op_slli;
   wire             D_op_sra;
@@ -3414,7 +3370,7 @@ module nios_system_nios2_qsys_0 (
   wire             D_op_xorhi;
   wire             D_op_xori;
   reg              D_valid;
-  wire    [ 55: 0] D_vinst;
+  wire    [ 71: 0] D_vinst;
   wire             D_wr_dst_reg;
   wire    [ 31: 0] E_alu_result;
   reg              E_alu_sub;
@@ -3440,6 +3396,7 @@ module nios_system_nios2_qsys_0 (
   wire             E_shift_rot_fill_bit;
   reg     [ 31: 0] E_shift_rot_result;
   wire    [ 31: 0] E_shift_rot_result_nxt;
+  wire    [  4: 0] E_shift_rot_shfcnt;
   wire             E_shift_rot_stall;
   reg     [ 31: 0] E_src1;
   reg     [ 31: 0] E_src2;
@@ -3447,7 +3404,7 @@ module nios_system_nios2_qsys_0 (
   wire             E_st_stall;
   wire             E_stall;
   reg              E_valid;
-  wire    [ 55: 0] E_vinst;
+  wire    [ 71: 0] E_vinst;
   wire             E_wrctl_bstatus;
   wire             E_wrctl_estatus;
   wire             E_wrctl_ienable;
@@ -3467,12 +3424,11 @@ module nios_system_nios2_qsys_0 (
   wire    [  1: 0] F_av_iw_memsz;
   wire    [  5: 0] F_av_iw_op;
   wire    [  5: 0] F_av_iw_opx;
-  wire    [  4: 0] F_av_iw_shift_imm5;
-  wire    [  4: 0] F_av_iw_trap_break_imm5;
   wire             F_av_mem16;
   wire             F_av_mem32;
   wire             F_av_mem8;
   wire    [ 55: 0] F_inst;
+  wire             F_is_opx_inst;
   wire    [ 31: 0] F_iw;
   wire    [  4: 0] F_iw_a;
   wire    [  4: 0] F_iw_b;
@@ -3488,8 +3444,6 @@ module nios_system_nios2_qsys_0 (
   wire    [  1: 0] F_iw_memsz;
   wire    [  5: 0] F_iw_op;
   wire    [  5: 0] F_iw_opx;
-  wire    [  4: 0] F_iw_shift_imm5;
-  wire    [  4: 0] F_iw_trap_break_imm5;
   wire             F_jmp_direct_pc_hi;
   wire             F_mem16;
   wire             F_mem32;
@@ -3556,7 +3510,41 @@ module nios_system_nios2_qsys_0 (
   wire             F_op_mulxuu;
   wire             F_op_nextpc;
   wire             F_op_nor;
-  wire             F_op_opx;
+  wire             F_op_op_rsv02;
+  wire             F_op_op_rsv09;
+  wire             F_op_op_rsv10;
+  wire             F_op_op_rsv17;
+  wire             F_op_op_rsv18;
+  wire             F_op_op_rsv25;
+  wire             F_op_op_rsv26;
+  wire             F_op_op_rsv33;
+  wire             F_op_op_rsv34;
+  wire             F_op_op_rsv41;
+  wire             F_op_op_rsv42;
+  wire             F_op_op_rsv49;
+  wire             F_op_op_rsv57;
+  wire             F_op_op_rsv61;
+  wire             F_op_op_rsv62;
+  wire             F_op_op_rsv63;
+  wire             F_op_opx_rsv00;
+  wire             F_op_opx_rsv10;
+  wire             F_op_opx_rsv15;
+  wire             F_op_opx_rsv17;
+  wire             F_op_opx_rsv21;
+  wire             F_op_opx_rsv25;
+  wire             F_op_opx_rsv33;
+  wire             F_op_opx_rsv34;
+  wire             F_op_opx_rsv35;
+  wire             F_op_opx_rsv42;
+  wire             F_op_opx_rsv43;
+  wire             F_op_opx_rsv44;
+  wire             F_op_opx_rsv47;
+  wire             F_op_opx_rsv50;
+  wire             F_op_opx_rsv51;
+  wire             F_op_opx_rsv55;
+  wire             F_op_opx_rsv56;
+  wire             F_op_opx_rsv60;
+  wire             F_op_opx_rsv63;
   wire             F_op_or;
   wire             F_op_orhi;
   wire             F_op_ori;
@@ -3566,41 +3554,6 @@ module nios_system_nios2_qsys_0 (
   wire             F_op_rol;
   wire             F_op_roli;
   wire             F_op_ror;
-  wire             F_op_rsv02;
-  wire             F_op_rsv09;
-  wire             F_op_rsv10;
-  wire             F_op_rsv17;
-  wire             F_op_rsv18;
-  wire             F_op_rsv25;
-  wire             F_op_rsv26;
-  wire             F_op_rsv33;
-  wire             F_op_rsv34;
-  wire             F_op_rsv41;
-  wire             F_op_rsv42;
-  wire             F_op_rsv49;
-  wire             F_op_rsv57;
-  wire             F_op_rsv61;
-  wire             F_op_rsv62;
-  wire             F_op_rsv63;
-  wire             F_op_rsvx00;
-  wire             F_op_rsvx10;
-  wire             F_op_rsvx15;
-  wire             F_op_rsvx17;
-  wire             F_op_rsvx21;
-  wire             F_op_rsvx25;
-  wire             F_op_rsvx33;
-  wire             F_op_rsvx34;
-  wire             F_op_rsvx35;
-  wire             F_op_rsvx42;
-  wire             F_op_rsvx43;
-  wire             F_op_rsvx44;
-  wire             F_op_rsvx47;
-  wire             F_op_rsvx50;
-  wire             F_op_rsvx51;
-  wire             F_op_rsvx55;
-  wire             F_op_rsvx56;
-  wire             F_op_rsvx60;
-  wire             F_op_rsvx63;
   wire             F_op_sll;
   wire             F_op_slli;
   wire             F_op_sra;
@@ -3632,8 +3585,10 @@ module nios_system_nios2_qsys_0 (
   wire    [ 28: 0] F_pcb_nxt;
   wire    [ 28: 0] F_pcb_plus_four;
   wire             F_valid;
-  wire    [ 55: 0] F_vinst;
+  wire    [ 71: 0] F_vinst;
   reg     [  1: 0] R_compare_op;
+  reg              R_ctrl_alu_force_and;
+  wire             R_ctrl_alu_force_and_nxt;
   reg              R_ctrl_alu_force_xor;
   wire             R_ctrl_alu_force_xor_nxt;
   reg              R_ctrl_alu_signed_comparison;
@@ -3668,11 +3623,15 @@ module nios_system_nios2_qsys_0 (
   wire             R_ctrl_implicit_dst_eretaddr_nxt;
   reg              R_ctrl_implicit_dst_retaddr;
   wire             R_ctrl_implicit_dst_retaddr_nxt;
+  reg              R_ctrl_intr_inst;
+  wire             R_ctrl_intr_inst_nxt;
   reg              R_ctrl_jmp_direct;
   wire             R_ctrl_jmp_direct_nxt;
   reg              R_ctrl_jmp_indirect;
   wire             R_ctrl_jmp_indirect_nxt;
   reg              R_ctrl_ld;
+  reg              R_ctrl_ld_ex;
+  wire             R_ctrl_ld_ex_nxt;
   reg              R_ctrl_ld_io;
   wire             R_ctrl_ld_io_nxt;
   reg              R_ctrl_ld_non_io;
@@ -3680,14 +3639,24 @@ module nios_system_nios2_qsys_0 (
   wire             R_ctrl_ld_nxt;
   reg              R_ctrl_ld_signed;
   wire             R_ctrl_ld_signed_nxt;
+  reg              R_ctrl_ld_st_ex;
+  wire             R_ctrl_ld_st_ex_nxt;
   reg              R_ctrl_logic;
   wire             R_ctrl_logic_nxt;
-  reg              R_ctrl_rdctl_inst;
-  wire             R_ctrl_rdctl_inst_nxt;
+  reg              R_ctrl_mem16;
+  wire             R_ctrl_mem16_nxt;
+  reg              R_ctrl_mem32;
+  wire             R_ctrl_mem32_nxt;
+  reg              R_ctrl_mem8;
+  wire             R_ctrl_mem8_nxt;
+  reg              R_ctrl_rd_ctl_reg;
+  wire             R_ctrl_rd_ctl_reg_nxt;
   reg              R_ctrl_retaddr;
   wire             R_ctrl_retaddr_nxt;
   reg              R_ctrl_rot_right;
   wire             R_ctrl_rot_right_nxt;
+  reg              R_ctrl_set_src2_rem_imm;
+  wire             R_ctrl_set_src2_rem_imm_nxt;
   reg              R_ctrl_shift_logical;
   wire             R_ctrl_shift_logical_nxt;
   reg              R_ctrl_shift_right_arith;
@@ -3696,9 +3665,15 @@ module nios_system_nios2_qsys_0 (
   wire             R_ctrl_shift_rot_nxt;
   reg              R_ctrl_shift_rot_right;
   wire             R_ctrl_shift_rot_right_nxt;
+  reg              R_ctrl_signed_imm12;
+  wire             R_ctrl_signed_imm12_nxt;
   reg              R_ctrl_src2_choose_imm;
   wire             R_ctrl_src2_choose_imm_nxt;
+  reg              R_ctrl_src_imm5_shift_rot;
+  wire             R_ctrl_src_imm5_shift_rot_nxt;
   reg              R_ctrl_st;
+  reg              R_ctrl_st_ex;
+  wire             R_ctrl_st_ex_nxt;
   wire             R_ctrl_st_nxt;
   reg              R_ctrl_uncond_cti_non_br;
   wire             R_ctrl_uncond_cti_non_br_nxt;
@@ -3718,8 +3693,9 @@ module nios_system_nios2_qsys_0 (
   reg              R_src2_use_imm;
   wire    [  7: 0] R_stb_data;
   wire    [ 15: 0] R_sth_data;
+  wire    [ 31: 0] R_stw_data;
   reg              R_valid;
-  wire    [ 55: 0] R_vinst;
+  wire    [ 71: 0] R_vinst;
   reg              R_wr_dst_reg;
   reg     [ 31: 0] W_alu_result;
   wire             W_br_taken;
@@ -3743,8 +3719,9 @@ module nios_system_nios2_qsys_0 (
   reg              W_status_reg_pie;
   wire             W_status_reg_pie_inst_nxt;
   wire             W_status_reg_pie_nxt;
+  reg              W_up_ex_mon_state;
   reg              W_valid /* synthesis ALTERA_IP_DEBUG_VISIBLE = 1 */;
-  wire    [ 55: 0] W_vinst;
+  wire    [ 71: 0] W_vinst;
   wire    [ 31: 0] W_wr_data;
   wire    [ 31: 0] W_wr_data_non_zero;
   wire             av_fill_bit;
@@ -3778,6 +3755,7 @@ module nios_system_nios2_qsys_0 (
   reg              d_write;
   wire             d_write_nxt;
   reg     [ 31: 0] d_writedata;
+  wire             dummy_ci_port;
   reg              hbreak_enabled;
   reg              hbreak_pending;
   wire             hbreak_pending_nxt;
@@ -3787,13 +3765,12 @@ module nios_system_nios2_qsys_0 (
   wire             i_read_nxt;
   wire    [ 31: 0] iactive;
   wire             intr_req;
-  wire             jtag_debug_module_clk;
-  wire             jtag_debug_module_debugaccess_to_roms;
-  wire    [ 31: 0] jtag_debug_module_readdata;
-  wire             jtag_debug_module_reset;
-  wire             jtag_debug_module_resetrequest;
-  wire             jtag_debug_module_waitrequest;
-  wire             no_ci_readra;
+  wire             jtag_debug_resetrequest;
+  wire             jtag_debug_slave_clk;
+  wire             jtag_debug_slave_debugaccess_to_roms;
+  wire    [ 31: 0] jtag_debug_slave_readdata;
+  wire             jtag_debug_slave_reset;
+  wire             jtag_debug_slave_waitrequest;
   wire             oci_hbreak_req;
   wire    [ 31: 0] oci_ienable;
   wire             oci_single_step_mode;
@@ -3842,8 +3819,6 @@ module nios_system_nios2_qsys_0 (
   assign F_av_iw_custom_writerc = F_av_iw[14];
   assign F_av_iw_opx = F_av_iw[16 : 11];
   assign F_av_iw_op = F_av_iw[5 : 0];
-  assign F_av_iw_shift_imm5 = F_av_iw[10 : 6];
-  assign F_av_iw_trap_break_imm5 = F_av_iw[10 : 6];
   assign F_av_iw_imm5 = F_av_iw[10 : 6];
   assign F_av_iw_imm16 = F_av_iw[21 : 6];
   assign F_av_iw_imm26 = F_av_iw[31 : 6];
@@ -3861,8 +3836,6 @@ module nios_system_nios2_qsys_0 (
   assign F_iw_custom_writerc = F_iw[14];
   assign F_iw_opx = F_iw[16 : 11];
   assign F_iw_op = F_iw[5 : 0];
-  assign F_iw_shift_imm5 = F_iw[10 : 6];
-  assign F_iw_trap_break_imm5 = F_iw[10 : 6];
   assign F_iw_imm5 = F_iw[10 : 6];
   assign F_iw_imm16 = F_iw[21 : 6];
   assign F_iw_imm26 = F_iw[31 : 6];
@@ -3880,8 +3853,6 @@ module nios_system_nios2_qsys_0 (
   assign D_iw_custom_writerc = D_iw[14];
   assign D_iw_opx = D_iw[16 : 11];
   assign D_iw_op = D_iw[5 : 0];
-  assign D_iw_shift_imm5 = D_iw[10 : 6];
-  assign D_iw_trap_break_imm5 = D_iw[10 : 6];
   assign D_iw_imm5 = D_iw[10 : 6];
   assign D_iw_imm16 = D_iw[21 : 6];
   assign D_iw_imm26 = D_iw[31 : 6];
@@ -3892,266 +3863,266 @@ module nios_system_nios2_qsys_0 (
   assign D_mem32 = D_iw_memsz[1] == 1'b1;
   assign F_op_call = F_iw_op == 0;
   assign F_op_jmpi = F_iw_op == 1;
+  assign F_op_op_rsv02 = F_iw_op == 2;
   assign F_op_ldbu = F_iw_op == 3;
   assign F_op_addi = F_iw_op == 4;
   assign F_op_stb = F_iw_op == 5;
   assign F_op_br = F_iw_op == 6;
   assign F_op_ldb = F_iw_op == 7;
   assign F_op_cmpgei = F_iw_op == 8;
+  assign F_op_op_rsv09 = F_iw_op == 9;
+  assign F_op_op_rsv10 = F_iw_op == 10;
   assign F_op_ldhu = F_iw_op == 11;
   assign F_op_andi = F_iw_op == 12;
   assign F_op_sth = F_iw_op == 13;
   assign F_op_bge = F_iw_op == 14;
   assign F_op_ldh = F_iw_op == 15;
   assign F_op_cmplti = F_iw_op == 16;
+  assign F_op_op_rsv17 = F_iw_op == 17;
+  assign F_op_op_rsv18 = F_iw_op == 18;
   assign F_op_initda = F_iw_op == 19;
   assign F_op_ori = F_iw_op == 20;
   assign F_op_stw = F_iw_op == 21;
   assign F_op_blt = F_iw_op == 22;
   assign F_op_ldw = F_iw_op == 23;
   assign F_op_cmpnei = F_iw_op == 24;
+  assign F_op_op_rsv25 = F_iw_op == 25;
+  assign F_op_op_rsv26 = F_iw_op == 26;
   assign F_op_flushda = F_iw_op == 27;
   assign F_op_xori = F_iw_op == 28;
   assign F_op_stc = F_iw_op == 29;
   assign F_op_bne = F_iw_op == 30;
   assign F_op_ldl = F_iw_op == 31;
   assign F_op_cmpeqi = F_iw_op == 32;
+  assign F_op_op_rsv33 = F_iw_op == 33;
+  assign F_op_op_rsv34 = F_iw_op == 34;
   assign F_op_ldbuio = F_iw_op == 35;
   assign F_op_muli = F_iw_op == 36;
   assign F_op_stbio = F_iw_op == 37;
   assign F_op_beq = F_iw_op == 38;
   assign F_op_ldbio = F_iw_op == 39;
   assign F_op_cmpgeui = F_iw_op == 40;
+  assign F_op_op_rsv41 = F_iw_op == 41;
+  assign F_op_op_rsv42 = F_iw_op == 42;
   assign F_op_ldhuio = F_iw_op == 43;
   assign F_op_andhi = F_iw_op == 44;
   assign F_op_sthio = F_iw_op == 45;
   assign F_op_bgeu = F_iw_op == 46;
   assign F_op_ldhio = F_iw_op == 47;
   assign F_op_cmpltui = F_iw_op == 48;
+  assign F_op_op_rsv49 = F_iw_op == 49;
+  assign F_op_custom = F_iw_op == 50;
   assign F_op_initd = F_iw_op == 51;
   assign F_op_orhi = F_iw_op == 52;
   assign F_op_stwio = F_iw_op == 53;
   assign F_op_bltu = F_iw_op == 54;
   assign F_op_ldwio = F_iw_op == 55;
   assign F_op_rdprs = F_iw_op == 56;
+  assign F_op_op_rsv57 = F_iw_op == 57;
   assign F_op_flushd = F_iw_op == 59;
   assign F_op_xorhi = F_iw_op == 60;
-  assign F_op_rsv02 = F_iw_op == 2;
-  assign F_op_rsv09 = F_iw_op == 9;
-  assign F_op_rsv10 = F_iw_op == 10;
-  assign F_op_rsv17 = F_iw_op == 17;
-  assign F_op_rsv18 = F_iw_op == 18;
-  assign F_op_rsv25 = F_iw_op == 25;
-  assign F_op_rsv26 = F_iw_op == 26;
-  assign F_op_rsv33 = F_iw_op == 33;
-  assign F_op_rsv34 = F_iw_op == 34;
-  assign F_op_rsv41 = F_iw_op == 41;
-  assign F_op_rsv42 = F_iw_op == 42;
-  assign F_op_rsv49 = F_iw_op == 49;
-  assign F_op_rsv57 = F_iw_op == 57;
-  assign F_op_rsv61 = F_iw_op == 61;
-  assign F_op_rsv62 = F_iw_op == 62;
-  assign F_op_rsv63 = F_iw_op == 63;
-  assign F_op_eret = F_op_opx & (F_iw_opx == 1);
-  assign F_op_roli = F_op_opx & (F_iw_opx == 2);
-  assign F_op_rol = F_op_opx & (F_iw_opx == 3);
-  assign F_op_flushp = F_op_opx & (F_iw_opx == 4);
-  assign F_op_ret = F_op_opx & (F_iw_opx == 5);
-  assign F_op_nor = F_op_opx & (F_iw_opx == 6);
-  assign F_op_mulxuu = F_op_opx & (F_iw_opx == 7);
-  assign F_op_cmpge = F_op_opx & (F_iw_opx == 8);
-  assign F_op_bret = F_op_opx & (F_iw_opx == 9);
-  assign F_op_ror = F_op_opx & (F_iw_opx == 11);
-  assign F_op_flushi = F_op_opx & (F_iw_opx == 12);
-  assign F_op_jmp = F_op_opx & (F_iw_opx == 13);
-  assign F_op_and = F_op_opx & (F_iw_opx == 14);
-  assign F_op_cmplt = F_op_opx & (F_iw_opx == 16);
-  assign F_op_slli = F_op_opx & (F_iw_opx == 18);
-  assign F_op_sll = F_op_opx & (F_iw_opx == 19);
-  assign F_op_wrprs = F_op_opx & (F_iw_opx == 20);
-  assign F_op_or = F_op_opx & (F_iw_opx == 22);
-  assign F_op_mulxsu = F_op_opx & (F_iw_opx == 23);
-  assign F_op_cmpne = F_op_opx & (F_iw_opx == 24);
-  assign F_op_srli = F_op_opx & (F_iw_opx == 26);
-  assign F_op_srl = F_op_opx & (F_iw_opx == 27);
-  assign F_op_nextpc = F_op_opx & (F_iw_opx == 28);
-  assign F_op_callr = F_op_opx & (F_iw_opx == 29);
-  assign F_op_xor = F_op_opx & (F_iw_opx == 30);
-  assign F_op_mulxss = F_op_opx & (F_iw_opx == 31);
-  assign F_op_cmpeq = F_op_opx & (F_iw_opx == 32);
-  assign F_op_divu = F_op_opx & (F_iw_opx == 36);
-  assign F_op_div = F_op_opx & (F_iw_opx == 37);
-  assign F_op_rdctl = F_op_opx & (F_iw_opx == 38);
-  assign F_op_mul = F_op_opx & (F_iw_opx == 39);
-  assign F_op_cmpgeu = F_op_opx & (F_iw_opx == 40);
-  assign F_op_initi = F_op_opx & (F_iw_opx == 41);
-  assign F_op_trap = F_op_opx & (F_iw_opx == 45);
-  assign F_op_wrctl = F_op_opx & (F_iw_opx == 46);
-  assign F_op_cmpltu = F_op_opx & (F_iw_opx == 48);
-  assign F_op_add = F_op_opx & (F_iw_opx == 49);
-  assign F_op_break = F_op_opx & (F_iw_opx == 52);
-  assign F_op_hbreak = F_op_opx & (F_iw_opx == 53);
-  assign F_op_sync = F_op_opx & (F_iw_opx == 54);
-  assign F_op_sub = F_op_opx & (F_iw_opx == 57);
-  assign F_op_srai = F_op_opx & (F_iw_opx == 58);
-  assign F_op_sra = F_op_opx & (F_iw_opx == 59);
-  assign F_op_intr = F_op_opx & (F_iw_opx == 61);
-  assign F_op_crst = F_op_opx & (F_iw_opx == 62);
-  assign F_op_rsvx00 = F_op_opx & (F_iw_opx == 0);
-  assign F_op_rsvx10 = F_op_opx & (F_iw_opx == 10);
-  assign F_op_rsvx15 = F_op_opx & (F_iw_opx == 15);
-  assign F_op_rsvx17 = F_op_opx & (F_iw_opx == 17);
-  assign F_op_rsvx21 = F_op_opx & (F_iw_opx == 21);
-  assign F_op_rsvx25 = F_op_opx & (F_iw_opx == 25);
-  assign F_op_rsvx33 = F_op_opx & (F_iw_opx == 33);
-  assign F_op_rsvx34 = F_op_opx & (F_iw_opx == 34);
-  assign F_op_rsvx35 = F_op_opx & (F_iw_opx == 35);
-  assign F_op_rsvx42 = F_op_opx & (F_iw_opx == 42);
-  assign F_op_rsvx43 = F_op_opx & (F_iw_opx == 43);
-  assign F_op_rsvx44 = F_op_opx & (F_iw_opx == 44);
-  assign F_op_rsvx47 = F_op_opx & (F_iw_opx == 47);
-  assign F_op_rsvx50 = F_op_opx & (F_iw_opx == 50);
-  assign F_op_rsvx51 = F_op_opx & (F_iw_opx == 51);
-  assign F_op_rsvx55 = F_op_opx & (F_iw_opx == 55);
-  assign F_op_rsvx56 = F_op_opx & (F_iw_opx == 56);
-  assign F_op_rsvx60 = F_op_opx & (F_iw_opx == 60);
-  assign F_op_rsvx63 = F_op_opx & (F_iw_opx == 63);
-  assign F_op_opx = F_iw_op == 58;
-  assign F_op_custom = F_iw_op == 50;
+  assign F_op_op_rsv61 = F_iw_op == 61;
+  assign F_op_op_rsv62 = F_iw_op == 62;
+  assign F_op_op_rsv63 = F_iw_op == 63;
+  assign F_op_opx_rsv00 = (F_iw_opx == 0) & F_is_opx_inst;
+  assign F_op_eret = (F_iw_opx == 1) & F_is_opx_inst;
+  assign F_op_roli = (F_iw_opx == 2) & F_is_opx_inst;
+  assign F_op_rol = (F_iw_opx == 3) & F_is_opx_inst;
+  assign F_op_flushp = (F_iw_opx == 4) & F_is_opx_inst;
+  assign F_op_ret = (F_iw_opx == 5) & F_is_opx_inst;
+  assign F_op_nor = (F_iw_opx == 6) & F_is_opx_inst;
+  assign F_op_mulxuu = (F_iw_opx == 7) & F_is_opx_inst;
+  assign F_op_cmpge = (F_iw_opx == 8) & F_is_opx_inst;
+  assign F_op_bret = (F_iw_opx == 9) & F_is_opx_inst;
+  assign F_op_opx_rsv10 = (F_iw_opx == 10) & F_is_opx_inst;
+  assign F_op_ror = (F_iw_opx == 11) & F_is_opx_inst;
+  assign F_op_flushi = (F_iw_opx == 12) & F_is_opx_inst;
+  assign F_op_jmp = (F_iw_opx == 13) & F_is_opx_inst;
+  assign F_op_and = (F_iw_opx == 14) & F_is_opx_inst;
+  assign F_op_opx_rsv15 = (F_iw_opx == 15) & F_is_opx_inst;
+  assign F_op_cmplt = (F_iw_opx == 16) & F_is_opx_inst;
+  assign F_op_opx_rsv17 = (F_iw_opx == 17) & F_is_opx_inst;
+  assign F_op_slli = (F_iw_opx == 18) & F_is_opx_inst;
+  assign F_op_sll = (F_iw_opx == 19) & F_is_opx_inst;
+  assign F_op_wrprs = (F_iw_opx == 20) & F_is_opx_inst;
+  assign F_op_opx_rsv21 = (F_iw_opx == 21) & F_is_opx_inst;
+  assign F_op_or = (F_iw_opx == 22) & F_is_opx_inst;
+  assign F_op_mulxsu = (F_iw_opx == 23) & F_is_opx_inst;
+  assign F_op_cmpne = (F_iw_opx == 24) & F_is_opx_inst;
+  assign F_op_opx_rsv25 = (F_iw_opx == 25) & F_is_opx_inst;
+  assign F_op_srli = (F_iw_opx == 26) & F_is_opx_inst;
+  assign F_op_srl = (F_iw_opx == 27) & F_is_opx_inst;
+  assign F_op_nextpc = (F_iw_opx == 28) & F_is_opx_inst;
+  assign F_op_callr = (F_iw_opx == 29) & F_is_opx_inst;
+  assign F_op_xor = (F_iw_opx == 30) & F_is_opx_inst;
+  assign F_op_mulxss = (F_iw_opx == 31) & F_is_opx_inst;
+  assign F_op_cmpeq = (F_iw_opx == 32) & F_is_opx_inst;
+  assign F_op_opx_rsv33 = (F_iw_opx == 33) & F_is_opx_inst;
+  assign F_op_opx_rsv34 = (F_iw_opx == 34) & F_is_opx_inst;
+  assign F_op_opx_rsv35 = (F_iw_opx == 35) & F_is_opx_inst;
+  assign F_op_divu = (F_iw_opx == 36) & F_is_opx_inst;
+  assign F_op_div = (F_iw_opx == 37) & F_is_opx_inst;
+  assign F_op_rdctl = (F_iw_opx == 38) & F_is_opx_inst;
+  assign F_op_mul = (F_iw_opx == 39) & F_is_opx_inst;
+  assign F_op_cmpgeu = (F_iw_opx == 40) & F_is_opx_inst;
+  assign F_op_initi = (F_iw_opx == 41) & F_is_opx_inst;
+  assign F_op_opx_rsv42 = (F_iw_opx == 42) & F_is_opx_inst;
+  assign F_op_opx_rsv43 = (F_iw_opx == 43) & F_is_opx_inst;
+  assign F_op_opx_rsv44 = (F_iw_opx == 44) & F_is_opx_inst;
+  assign F_op_trap = (F_iw_opx == 45) & F_is_opx_inst;
+  assign F_op_wrctl = (F_iw_opx == 46) & F_is_opx_inst;
+  assign F_op_opx_rsv47 = (F_iw_opx == 47) & F_is_opx_inst;
+  assign F_op_cmpltu = (F_iw_opx == 48) & F_is_opx_inst;
+  assign F_op_add = (F_iw_opx == 49) & F_is_opx_inst;
+  assign F_op_opx_rsv50 = (F_iw_opx == 50) & F_is_opx_inst;
+  assign F_op_opx_rsv51 = (F_iw_opx == 51) & F_is_opx_inst;
+  assign F_op_break = (F_iw_opx == 52) & F_is_opx_inst;
+  assign F_op_hbreak = (F_iw_opx == 53) & F_is_opx_inst;
+  assign F_op_sync = (F_iw_opx == 54) & F_is_opx_inst;
+  assign F_op_opx_rsv55 = (F_iw_opx == 55) & F_is_opx_inst;
+  assign F_op_opx_rsv56 = (F_iw_opx == 56) & F_is_opx_inst;
+  assign F_op_sub = (F_iw_opx == 57) & F_is_opx_inst;
+  assign F_op_srai = (F_iw_opx == 58) & F_is_opx_inst;
+  assign F_op_sra = (F_iw_opx == 59) & F_is_opx_inst;
+  assign F_op_opx_rsv60 = (F_iw_opx == 60) & F_is_opx_inst;
+  assign F_op_intr = (F_iw_opx == 61) & F_is_opx_inst;
+  assign F_op_crst = (F_iw_opx == 62) & F_is_opx_inst;
+  assign F_op_opx_rsv63 = (F_iw_opx == 63) & F_is_opx_inst;
+  assign F_is_opx_inst = F_iw_op == 58;
   assign D_op_call = D_iw_op == 0;
   assign D_op_jmpi = D_iw_op == 1;
+  assign D_op_op_rsv02 = D_iw_op == 2;
   assign D_op_ldbu = D_iw_op == 3;
   assign D_op_addi = D_iw_op == 4;
   assign D_op_stb = D_iw_op == 5;
   assign D_op_br = D_iw_op == 6;
   assign D_op_ldb = D_iw_op == 7;
   assign D_op_cmpgei = D_iw_op == 8;
+  assign D_op_op_rsv09 = D_iw_op == 9;
+  assign D_op_op_rsv10 = D_iw_op == 10;
   assign D_op_ldhu = D_iw_op == 11;
   assign D_op_andi = D_iw_op == 12;
   assign D_op_sth = D_iw_op == 13;
   assign D_op_bge = D_iw_op == 14;
   assign D_op_ldh = D_iw_op == 15;
   assign D_op_cmplti = D_iw_op == 16;
+  assign D_op_op_rsv17 = D_iw_op == 17;
+  assign D_op_op_rsv18 = D_iw_op == 18;
   assign D_op_initda = D_iw_op == 19;
   assign D_op_ori = D_iw_op == 20;
   assign D_op_stw = D_iw_op == 21;
   assign D_op_blt = D_iw_op == 22;
   assign D_op_ldw = D_iw_op == 23;
   assign D_op_cmpnei = D_iw_op == 24;
+  assign D_op_op_rsv25 = D_iw_op == 25;
+  assign D_op_op_rsv26 = D_iw_op == 26;
   assign D_op_flushda = D_iw_op == 27;
   assign D_op_xori = D_iw_op == 28;
   assign D_op_stc = D_iw_op == 29;
   assign D_op_bne = D_iw_op == 30;
   assign D_op_ldl = D_iw_op == 31;
   assign D_op_cmpeqi = D_iw_op == 32;
+  assign D_op_op_rsv33 = D_iw_op == 33;
+  assign D_op_op_rsv34 = D_iw_op == 34;
   assign D_op_ldbuio = D_iw_op == 35;
   assign D_op_muli = D_iw_op == 36;
   assign D_op_stbio = D_iw_op == 37;
   assign D_op_beq = D_iw_op == 38;
   assign D_op_ldbio = D_iw_op == 39;
   assign D_op_cmpgeui = D_iw_op == 40;
+  assign D_op_op_rsv41 = D_iw_op == 41;
+  assign D_op_op_rsv42 = D_iw_op == 42;
   assign D_op_ldhuio = D_iw_op == 43;
   assign D_op_andhi = D_iw_op == 44;
   assign D_op_sthio = D_iw_op == 45;
   assign D_op_bgeu = D_iw_op == 46;
   assign D_op_ldhio = D_iw_op == 47;
   assign D_op_cmpltui = D_iw_op == 48;
+  assign D_op_op_rsv49 = D_iw_op == 49;
+  assign D_op_custom = D_iw_op == 50;
   assign D_op_initd = D_iw_op == 51;
   assign D_op_orhi = D_iw_op == 52;
   assign D_op_stwio = D_iw_op == 53;
   assign D_op_bltu = D_iw_op == 54;
   assign D_op_ldwio = D_iw_op == 55;
   assign D_op_rdprs = D_iw_op == 56;
+  assign D_op_op_rsv57 = D_iw_op == 57;
   assign D_op_flushd = D_iw_op == 59;
   assign D_op_xorhi = D_iw_op == 60;
-  assign D_op_rsv02 = D_iw_op == 2;
-  assign D_op_rsv09 = D_iw_op == 9;
-  assign D_op_rsv10 = D_iw_op == 10;
-  assign D_op_rsv17 = D_iw_op == 17;
-  assign D_op_rsv18 = D_iw_op == 18;
-  assign D_op_rsv25 = D_iw_op == 25;
-  assign D_op_rsv26 = D_iw_op == 26;
-  assign D_op_rsv33 = D_iw_op == 33;
-  assign D_op_rsv34 = D_iw_op == 34;
-  assign D_op_rsv41 = D_iw_op == 41;
-  assign D_op_rsv42 = D_iw_op == 42;
-  assign D_op_rsv49 = D_iw_op == 49;
-  assign D_op_rsv57 = D_iw_op == 57;
-  assign D_op_rsv61 = D_iw_op == 61;
-  assign D_op_rsv62 = D_iw_op == 62;
-  assign D_op_rsv63 = D_iw_op == 63;
-  assign D_op_eret = D_op_opx & (D_iw_opx == 1);
-  assign D_op_roli = D_op_opx & (D_iw_opx == 2);
-  assign D_op_rol = D_op_opx & (D_iw_opx == 3);
-  assign D_op_flushp = D_op_opx & (D_iw_opx == 4);
-  assign D_op_ret = D_op_opx & (D_iw_opx == 5);
-  assign D_op_nor = D_op_opx & (D_iw_opx == 6);
-  assign D_op_mulxuu = D_op_opx & (D_iw_opx == 7);
-  assign D_op_cmpge = D_op_opx & (D_iw_opx == 8);
-  assign D_op_bret = D_op_opx & (D_iw_opx == 9);
-  assign D_op_ror = D_op_opx & (D_iw_opx == 11);
-  assign D_op_flushi = D_op_opx & (D_iw_opx == 12);
-  assign D_op_jmp = D_op_opx & (D_iw_opx == 13);
-  assign D_op_and = D_op_opx & (D_iw_opx == 14);
-  assign D_op_cmplt = D_op_opx & (D_iw_opx == 16);
-  assign D_op_slli = D_op_opx & (D_iw_opx == 18);
-  assign D_op_sll = D_op_opx & (D_iw_opx == 19);
-  assign D_op_wrprs = D_op_opx & (D_iw_opx == 20);
-  assign D_op_or = D_op_opx & (D_iw_opx == 22);
-  assign D_op_mulxsu = D_op_opx & (D_iw_opx == 23);
-  assign D_op_cmpne = D_op_opx & (D_iw_opx == 24);
-  assign D_op_srli = D_op_opx & (D_iw_opx == 26);
-  assign D_op_srl = D_op_opx & (D_iw_opx == 27);
-  assign D_op_nextpc = D_op_opx & (D_iw_opx == 28);
-  assign D_op_callr = D_op_opx & (D_iw_opx == 29);
-  assign D_op_xor = D_op_opx & (D_iw_opx == 30);
-  assign D_op_mulxss = D_op_opx & (D_iw_opx == 31);
-  assign D_op_cmpeq = D_op_opx & (D_iw_opx == 32);
-  assign D_op_divu = D_op_opx & (D_iw_opx == 36);
-  assign D_op_div = D_op_opx & (D_iw_opx == 37);
-  assign D_op_rdctl = D_op_opx & (D_iw_opx == 38);
-  assign D_op_mul = D_op_opx & (D_iw_opx == 39);
-  assign D_op_cmpgeu = D_op_opx & (D_iw_opx == 40);
-  assign D_op_initi = D_op_opx & (D_iw_opx == 41);
-  assign D_op_trap = D_op_opx & (D_iw_opx == 45);
-  assign D_op_wrctl = D_op_opx & (D_iw_opx == 46);
-  assign D_op_cmpltu = D_op_opx & (D_iw_opx == 48);
-  assign D_op_add = D_op_opx & (D_iw_opx == 49);
-  assign D_op_break = D_op_opx & (D_iw_opx == 52);
-  assign D_op_hbreak = D_op_opx & (D_iw_opx == 53);
-  assign D_op_sync = D_op_opx & (D_iw_opx == 54);
-  assign D_op_sub = D_op_opx & (D_iw_opx == 57);
-  assign D_op_srai = D_op_opx & (D_iw_opx == 58);
-  assign D_op_sra = D_op_opx & (D_iw_opx == 59);
-  assign D_op_intr = D_op_opx & (D_iw_opx == 61);
-  assign D_op_crst = D_op_opx & (D_iw_opx == 62);
-  assign D_op_rsvx00 = D_op_opx & (D_iw_opx == 0);
-  assign D_op_rsvx10 = D_op_opx & (D_iw_opx == 10);
-  assign D_op_rsvx15 = D_op_opx & (D_iw_opx == 15);
-  assign D_op_rsvx17 = D_op_opx & (D_iw_opx == 17);
-  assign D_op_rsvx21 = D_op_opx & (D_iw_opx == 21);
-  assign D_op_rsvx25 = D_op_opx & (D_iw_opx == 25);
-  assign D_op_rsvx33 = D_op_opx & (D_iw_opx == 33);
-  assign D_op_rsvx34 = D_op_opx & (D_iw_opx == 34);
-  assign D_op_rsvx35 = D_op_opx & (D_iw_opx == 35);
-  assign D_op_rsvx42 = D_op_opx & (D_iw_opx == 42);
-  assign D_op_rsvx43 = D_op_opx & (D_iw_opx == 43);
-  assign D_op_rsvx44 = D_op_opx & (D_iw_opx == 44);
-  assign D_op_rsvx47 = D_op_opx & (D_iw_opx == 47);
-  assign D_op_rsvx50 = D_op_opx & (D_iw_opx == 50);
-  assign D_op_rsvx51 = D_op_opx & (D_iw_opx == 51);
-  assign D_op_rsvx55 = D_op_opx & (D_iw_opx == 55);
-  assign D_op_rsvx56 = D_op_opx & (D_iw_opx == 56);
-  assign D_op_rsvx60 = D_op_opx & (D_iw_opx == 60);
-  assign D_op_rsvx63 = D_op_opx & (D_iw_opx == 63);
-  assign D_op_opx = D_iw_op == 58;
-  assign D_op_custom = D_iw_op == 50;
+  assign D_op_op_rsv61 = D_iw_op == 61;
+  assign D_op_op_rsv62 = D_iw_op == 62;
+  assign D_op_op_rsv63 = D_iw_op == 63;
+  assign D_op_opx_rsv00 = (D_iw_opx == 0) & D_is_opx_inst;
+  assign D_op_eret = (D_iw_opx == 1) & D_is_opx_inst;
+  assign D_op_roli = (D_iw_opx == 2) & D_is_opx_inst;
+  assign D_op_rol = (D_iw_opx == 3) & D_is_opx_inst;
+  assign D_op_flushp = (D_iw_opx == 4) & D_is_opx_inst;
+  assign D_op_ret = (D_iw_opx == 5) & D_is_opx_inst;
+  assign D_op_nor = (D_iw_opx == 6) & D_is_opx_inst;
+  assign D_op_mulxuu = (D_iw_opx == 7) & D_is_opx_inst;
+  assign D_op_cmpge = (D_iw_opx == 8) & D_is_opx_inst;
+  assign D_op_bret = (D_iw_opx == 9) & D_is_opx_inst;
+  assign D_op_opx_rsv10 = (D_iw_opx == 10) & D_is_opx_inst;
+  assign D_op_ror = (D_iw_opx == 11) & D_is_opx_inst;
+  assign D_op_flushi = (D_iw_opx == 12) & D_is_opx_inst;
+  assign D_op_jmp = (D_iw_opx == 13) & D_is_opx_inst;
+  assign D_op_and = (D_iw_opx == 14) & D_is_opx_inst;
+  assign D_op_opx_rsv15 = (D_iw_opx == 15) & D_is_opx_inst;
+  assign D_op_cmplt = (D_iw_opx == 16) & D_is_opx_inst;
+  assign D_op_opx_rsv17 = (D_iw_opx == 17) & D_is_opx_inst;
+  assign D_op_slli = (D_iw_opx == 18) & D_is_opx_inst;
+  assign D_op_sll = (D_iw_opx == 19) & D_is_opx_inst;
+  assign D_op_wrprs = (D_iw_opx == 20) & D_is_opx_inst;
+  assign D_op_opx_rsv21 = (D_iw_opx == 21) & D_is_opx_inst;
+  assign D_op_or = (D_iw_opx == 22) & D_is_opx_inst;
+  assign D_op_mulxsu = (D_iw_opx == 23) & D_is_opx_inst;
+  assign D_op_cmpne = (D_iw_opx == 24) & D_is_opx_inst;
+  assign D_op_opx_rsv25 = (D_iw_opx == 25) & D_is_opx_inst;
+  assign D_op_srli = (D_iw_opx == 26) & D_is_opx_inst;
+  assign D_op_srl = (D_iw_opx == 27) & D_is_opx_inst;
+  assign D_op_nextpc = (D_iw_opx == 28) & D_is_opx_inst;
+  assign D_op_callr = (D_iw_opx == 29) & D_is_opx_inst;
+  assign D_op_xor = (D_iw_opx == 30) & D_is_opx_inst;
+  assign D_op_mulxss = (D_iw_opx == 31) & D_is_opx_inst;
+  assign D_op_cmpeq = (D_iw_opx == 32) & D_is_opx_inst;
+  assign D_op_opx_rsv33 = (D_iw_opx == 33) & D_is_opx_inst;
+  assign D_op_opx_rsv34 = (D_iw_opx == 34) & D_is_opx_inst;
+  assign D_op_opx_rsv35 = (D_iw_opx == 35) & D_is_opx_inst;
+  assign D_op_divu = (D_iw_opx == 36) & D_is_opx_inst;
+  assign D_op_div = (D_iw_opx == 37) & D_is_opx_inst;
+  assign D_op_rdctl = (D_iw_opx == 38) & D_is_opx_inst;
+  assign D_op_mul = (D_iw_opx == 39) & D_is_opx_inst;
+  assign D_op_cmpgeu = (D_iw_opx == 40) & D_is_opx_inst;
+  assign D_op_initi = (D_iw_opx == 41) & D_is_opx_inst;
+  assign D_op_opx_rsv42 = (D_iw_opx == 42) & D_is_opx_inst;
+  assign D_op_opx_rsv43 = (D_iw_opx == 43) & D_is_opx_inst;
+  assign D_op_opx_rsv44 = (D_iw_opx == 44) & D_is_opx_inst;
+  assign D_op_trap = (D_iw_opx == 45) & D_is_opx_inst;
+  assign D_op_wrctl = (D_iw_opx == 46) & D_is_opx_inst;
+  assign D_op_opx_rsv47 = (D_iw_opx == 47) & D_is_opx_inst;
+  assign D_op_cmpltu = (D_iw_opx == 48) & D_is_opx_inst;
+  assign D_op_add = (D_iw_opx == 49) & D_is_opx_inst;
+  assign D_op_opx_rsv50 = (D_iw_opx == 50) & D_is_opx_inst;
+  assign D_op_opx_rsv51 = (D_iw_opx == 51) & D_is_opx_inst;
+  assign D_op_break = (D_iw_opx == 52) & D_is_opx_inst;
+  assign D_op_hbreak = (D_iw_opx == 53) & D_is_opx_inst;
+  assign D_op_sync = (D_iw_opx == 54) & D_is_opx_inst;
+  assign D_op_opx_rsv55 = (D_iw_opx == 55) & D_is_opx_inst;
+  assign D_op_opx_rsv56 = (D_iw_opx == 56) & D_is_opx_inst;
+  assign D_op_sub = (D_iw_opx == 57) & D_is_opx_inst;
+  assign D_op_srai = (D_iw_opx == 58) & D_is_opx_inst;
+  assign D_op_sra = (D_iw_opx == 59) & D_is_opx_inst;
+  assign D_op_opx_rsv60 = (D_iw_opx == 60) & D_is_opx_inst;
+  assign D_op_intr = (D_iw_opx == 61) & D_is_opx_inst;
+  assign D_op_crst = (D_iw_opx == 62) & D_is_opx_inst;
+  assign D_op_opx_rsv63 = (D_iw_opx == 63) & D_is_opx_inst;
+  assign D_is_opx_inst = D_iw_op == 58;
   assign R_en = 1'b1;
   assign E_ci_result = 0;
   //custom_instruction_master, which is an e_custom_instruction_master
-  assign no_ci_readra = 1'b0;
+  assign dummy_ci_port = 1'b0;
   assign E_ci_multi_stall = 1'b0;
-  assign iactive = d_irq[31 : 0] & 32'b00000000000000000000000000100000;
+  assign iactive = irq[31 : 0] & 32'b00000000000000000000000000100000;
   assign F_pc_sel_nxt = R_ctrl_exception                          ? 2'b00 :
     R_ctrl_break                              ? 2'b01 :
     (W_br_taken | R_ctrl_uncond_cti_non_br)   ? 2'b10 :
@@ -4243,11 +4214,14 @@ module nios_system_nios2_qsys_0 (
     D_iw_c;
 
   assign D_wr_dst_reg = (D_dst_regnum != 0) & ~D_ctrl_ignore_dst;
-  assign D_logic_op_raw = D_op_opx ? D_iw_opx[4 : 3] : 
+  assign D_logic_op_raw = D_is_opx_inst ? D_iw_opx[4 : 3] :
     D_iw_op[4 : 3];
 
-  assign D_logic_op = D_ctrl_alu_force_xor ? 2'b11 : D_logic_op_raw;
-  assign D_compare_op = D_op_opx ? D_iw_opx[4 : 3] : 
+  assign D_logic_op = D_ctrl_alu_force_xor ? 2'b11 : 
+    D_ctrl_alu_force_and ? 2'b01 :
+    D_logic_op_raw;
+
+  assign D_compare_op = D_is_opx_inst ? D_iw_opx[4 : 3] : 
     D_iw_op[4 : 3];
 
   assign F_jmp_direct_pc_hi = F_pc[26];
@@ -4326,9 +4300,6 @@ defparam nios_system_nios2_qsys_0_register_bank_a.lpm_file = "nios_system_nios2_
 defparam nios_system_nios2_qsys_0_register_bank_a.lpm_file = "nios_system_nios2_qsys_0_rf_ram_a.hex";
 `endif
 //synthesis translate_on
-//synthesis read_comments_as_HDL on
-//defparam nios_system_nios2_qsys_0_register_bank_a.lpm_file = "nios_system_nios2_qsys_0_rf_ram_a.mif";
-//synthesis read_comments_as_HDL off
 //nios_system_nios2_qsys_0_register_bank_b, which is an nios_sdp_ram
 nios_system_nios2_qsys_0_register_bank_b_module nios_system_nios2_qsys_0_register_bank_b
   (
@@ -4347,18 +4318,16 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_qsys_0_rf_ram_b.hex";
 `endif
 //synthesis translate_on
-//synthesis read_comments_as_HDL on
-//defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_qsys_0_rf_ram_b.mif";
-//synthesis read_comments_as_HDL off
   assign R_src1 = (((R_ctrl_br & E_valid) | (R_ctrl_retaddr & R_valid)))? {F_pc_plus_one, 2'b00} :
     ((R_ctrl_jmp_direct & E_valid))? {D_jmp_direct_target_waddr, 2'b00} :
     R_rf_a;
 
-  assign R_src2_lo = ((R_ctrl_force_src2_zero|R_ctrl_hi_imm16))? 16'b0 :
+  assign R_src2_lo = ((R_ctrl_force_src2_zero|R_ctrl_hi_imm16))? {16 {D_ctrl_set_src2_rem_imm}} :
+    (R_ctrl_src_imm5_shift_rot)? {{11 {1'b0}},D_iw_imm5} :
     (R_src2_use_imm)? D_iw_imm16 :
     R_rf_b[15 : 0];
 
-  assign R_src2_hi = ((R_ctrl_force_src2_zero|R_ctrl_unsigned_lo_imm16))? 16'b0 :
+  assign R_src2_hi = ((R_ctrl_force_src2_zero|R_ctrl_unsigned_lo_imm16))? {16 {D_ctrl_set_src2_rem_imm}} :
     (R_ctrl_hi_imm16)? D_iw_imm16 :
     (R_src2_use_imm)? {16 {D_iw_imm16[15]}} :
     R_rf_b[31 : 16];
@@ -4443,7 +4412,8 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     (R_compare_op == 2'b10)? E_lt :
     ~E_eq;
 
-  assign E_shift_rot_cnt_nxt = E_new_inst ? E_src2[4 : 0] : E_shift_rot_cnt-1;
+  assign E_shift_rot_shfcnt = E_src2[4 : 0];
+  assign E_shift_rot_cnt_nxt = E_new_inst ? E_shift_rot_shfcnt : E_shift_rot_cnt-1;
   assign E_shift_rot_done = (E_shift_rot_cnt == 0) & ~E_new_inst;
   assign E_shift_rot_stall = R_ctrl_shift_rot & E_valid & ~E_shift_rot_done;
   assign E_shift_rot_fill_bit = R_ctrl_shift_logical ? 1'b0 :
@@ -4479,31 +4449,32 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     (D_iw_control_regnum == 3'd4)? W_ipending_reg :
     W_cpuid_reg;
 
-  assign E_alu_result = ((R_ctrl_br_cmp | R_ctrl_rdctl_inst))? 0 :
+  assign E_alu_result = ((R_ctrl_br_cmp | R_ctrl_rd_ctl_reg))? 0 :
     (R_ctrl_shift_rot)? E_shift_rot_result :
     (R_ctrl_logic)? E_logic_result :
     (R_ctrl_custom)? E_ci_result :
     E_arith_result;
 
-  assign R_stb_data = R_rf_b[7 : 0];
   assign R_sth_data = R_rf_b[15 : 0];
-  assign E_st_data = (D_mem8)? {R_stb_data, R_stb_data, R_stb_data, R_stb_data} :
-    (D_mem16)? {R_sth_data, R_sth_data} :
-    R_rf_b;
+  assign R_stw_data = R_rf_b[31 : 0];
+  assign R_stb_data = R_rf_b[7 : 0];
+  assign E_st_data = (D_ctrl_mem8)? {R_stb_data, R_stb_data, R_stb_data, R_stb_data} :
+    (D_ctrl_mem16)? {R_sth_data, R_sth_data} :
+    R_stw_data;
 
-  assign E_mem_byte_en = ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b00, 2'b00})? 4'b0001 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b00, 2'b01})? 4'b0010 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b00, 2'b10})? 4'b0100 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b00, 2'b11})? 4'b1000 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b01, 2'b00})? 4'b0011 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b01, 2'b01})? 4'b0011 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b01, 2'b10})? 4'b1100 :
-    ({D_iw_memsz, E_mem_baddr[1 : 0]} == {2'b01, 2'b11})? 4'b1100 :
+  assign E_mem_byte_en = ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b01, 2'b00})? 4'b0001 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b01, 2'b01})? 4'b0010 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b01, 2'b10})? 4'b0100 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b01, 2'b11})? 4'b1000 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b10, 2'b00})? 4'b0011 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b10, 2'b01})? 4'b0011 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b10, 2'b10})? 4'b1100 :
+    ({D_ctrl_mem16, D_ctrl_mem8, E_mem_baddr[1 : 0]} == {2'b10, 2'b11})? 4'b1100 :
     4'b1111;
 
   assign d_read_nxt = (R_ctrl_ld & E_new_inst) | (d_read & d_waitrequest);
   assign E_ld_stall = R_ctrl_ld & ((E_valid & ~av_ld_done) | E_new_inst);
-  assign d_write_nxt = (R_ctrl_st & E_new_inst) | (d_write & d_waitrequest);
+  assign d_write_nxt = ((R_ctrl_st & (~R_ctrl_st_ex | W_up_ex_mon_state)) & E_new_inst) | (d_write & d_waitrequest);
   assign E_st_stall = d_write_nxt;
   assign d_address = W_mem_baddr;
   assign av_ld_getting_data = d_read & ~d_waitrequest;
@@ -4535,41 +4506,37 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
 
   assign av_ld_align_cycle_nxt = av_ld_getting_data ? 0 : (av_ld_align_cycle+1);
-  assign av_ld_align_one_more_cycle = av_ld_align_cycle == (D_mem16 ? 2 : 3);
+  assign av_ld_align_one_more_cycle = av_ld_align_cycle == (D_ctrl_mem16 ? 2 : 3);
   assign av_ld_aligning_data_nxt = av_ld_aligning_data ? 
     ~av_ld_align_one_more_cycle : 
-    (~D_mem32 & av_ld_getting_data);
+    (~D_ctrl_mem32 & av_ld_getting_data);
 
   assign av_ld_waiting_for_data_nxt = av_ld_waiting_for_data ? 
     ~av_ld_getting_data : 
     (R_ctrl_ld & E_new_inst);
 
-  assign av_ld_done = ~av_ld_waiting_for_data_nxt & (D_mem32 | ~av_ld_aligning_data_nxt);
+  assign av_ld_done = ~av_ld_waiting_for_data_nxt & (D_ctrl_mem32 | ~av_ld_aligning_data_nxt);
   assign av_ld_rshift8 = av_ld_aligning_data & 
     (av_ld_align_cycle < (W_mem_baddr[1 : 0]));
 
   assign av_ld_extend = av_ld_aligning_data;
   assign av_ld_byte0_data_nxt = av_ld_rshift8      ? av_ld_byte1_data :
-    av_ld_extend       ? av_ld_byte0_data :
-    d_readdata[7 : 0];
+    av_ld_extend       ? av_ld_byte0_data :d_readdata[7 : 0];
 
   assign av_ld_byte1_data_nxt = av_ld_rshift8      ? av_ld_byte2_data :
-    av_ld_extend       ? {8 {av_fill_bit}} :
-    d_readdata[15 : 8];
+    av_ld_extend       ? {8 {av_fill_bit}} :d_readdata[15 : 8];
 
   assign av_ld_byte2_data_nxt = av_ld_rshift8      ? av_ld_byte3_data :
-    av_ld_extend       ? {8 {av_fill_bit}} :
-    d_readdata[23 : 16];
+    av_ld_extend       ? {8 {av_fill_bit}} :d_readdata[23 : 16];
 
   assign av_ld_byte3_data_nxt = av_ld_rshift8      ? av_ld_byte3_data :
-    av_ld_extend       ? {8 {av_fill_bit}} :
-    d_readdata[31 : 24];
+    av_ld_extend       ? {8 {av_fill_bit}} :d_readdata[31 : 24];
 
-  assign av_ld_byte1_data_en = ~(av_ld_extend & D_mem16 & ~av_ld_rshift8);
+  assign av_ld_byte1_data_en = ~(av_ld_extend & D_ctrl_mem16 & ~av_ld_rshift8);
   assign av_ld_data_aligned_unfiltered = {av_ld_byte3_data, av_ld_byte2_data, 
     av_ld_byte1_data, av_ld_byte0_data};
 
-  assign av_sign_bit = D_mem16 ? av_ld_byte1_data[7] : av_ld_byte0_data[7];
+  assign av_sign_bit = D_ctrl_mem16 ? av_ld_byte1_data[7] : av_ld_byte0_data[7];
   assign av_fill_bit = av_sign_bit & R_ctrl_ld_signed;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4637,6 +4604,18 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
   always @(posedge clk or negedge reset_n)
     begin
       if (reset_n == 0)
+          W_up_ex_mon_state <= 0;
+      else if (R_en)
+          W_up_ex_mon_state <= (R_ctrl_ld_ex & W_valid) ? 1'b1 :
+                    ((D_op_eret & W_valid) | (R_ctrl_st_ex & W_valid)) ? 1'b0 : 
+                    W_up_ex_mon_state;
+
+    end
+
+
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
           W_valid <= 0;
       else 
         W_valid <= E_valid & ~E_stall;
@@ -4648,7 +4627,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
       if (reset_n == 0)
           W_control_rd_data <= 0;
       else 
-        W_control_rd_data <= E_control_rd_data;
+        W_control_rd_data <= D_ctrl_intr_inst ? W_status_reg : E_control_rd_data;
     end
 
 
@@ -4717,11 +4696,11 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
   assign W_cpuid_reg = 0;
   assign W_wr_data_non_zero = R_ctrl_br_cmp ? W_cmp_result :
-    R_ctrl_rdctl_inst       ? W_control_rd_data :
+    R_ctrl_rd_ctl_reg       ? W_control_rd_data :
     W_alu_result[31 : 0];
 
   assign W_wr_data = W_wr_data_non_zero;
-  assign W_br_taken = R_ctrl_br & W_cmp_result;
+  assign W_br_taken = R_ctrl_br_uncond | (R_ctrl_br & W_cmp_result);
   assign W_mem_baddr = W_alu_result[28 : 0];
   assign W_status_reg = W_status_reg_pie;
   assign E_wrctl_status = R_ctrl_wrctl_inst & 
@@ -4778,40 +4757,40 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
   nios_system_nios2_qsys_0_nios2_oci the_nios_system_nios2_qsys_0_nios2_oci
     (
-      .D_valid                               (D_valid),
-      .E_st_data                             (E_st_data),
-      .E_valid                               (E_valid),
-      .F_pc                                  (F_pc),
-      .address_nxt                           (jtag_debug_module_address),
-      .av_ld_data_aligned_filtered           (av_ld_data_aligned_filtered),
-      .byteenable_nxt                        (jtag_debug_module_byteenable),
-      .clk                                   (jtag_debug_module_clk),
-      .d_address                             (d_address),
-      .d_read                                (d_read),
-      .d_waitrequest                         (d_waitrequest),
-      .d_write                               (d_write),
-      .debugaccess_nxt                       (jtag_debug_module_debugaccess),
-      .hbreak_enabled                        (hbreak_enabled),
-      .jtag_debug_module_debugaccess_to_roms (jtag_debug_module_debugaccess_to_roms),
-      .oci_hbreak_req                        (oci_hbreak_req),
-      .oci_ienable                           (oci_ienable),
-      .oci_single_step_mode                  (oci_single_step_mode),
-      .read_nxt                              (jtag_debug_module_read),
-      .readdata                              (jtag_debug_module_readdata),
-      .reset                                 (jtag_debug_module_reset),
-      .reset_n                               (reset_n),
-      .reset_req                             (reset_req),
-      .resetrequest                          (jtag_debug_module_resetrequest),
-      .test_ending                           (test_ending),
-      .test_has_ended                        (test_has_ended),
-      .waitrequest                           (jtag_debug_module_waitrequest),
-      .write_nxt                             (jtag_debug_module_write),
-      .writedata_nxt                         (jtag_debug_module_writedata)
+      .D_valid                              (D_valid),
+      .E_st_data                            (E_st_data),
+      .E_valid                              (E_valid),
+      .F_pc                                 (F_pc),
+      .address_nxt                          (jtag_debug_slave_address),
+      .av_ld_data_aligned_filtered          (av_ld_data_aligned_filtered),
+      .byteenable_nxt                       (jtag_debug_slave_byteenable),
+      .clk                                  (jtag_debug_slave_clk),
+      .d_address                            (d_address),
+      .d_read                               (d_read),
+      .d_waitrequest                        (d_waitrequest),
+      .d_write                              (d_write),
+      .debugaccess_nxt                      (jtag_debug_slave_debugaccess),
+      .hbreak_enabled                       (hbreak_enabled),
+      .jtag_debug_slave_debugaccess_to_roms (jtag_debug_slave_debugaccess_to_roms),
+      .oci_hbreak_req                       (oci_hbreak_req),
+      .oci_ienable                          (oci_ienable),
+      .oci_single_step_mode                 (oci_single_step_mode),
+      .read_nxt                             (jtag_debug_slave_read),
+      .readdata                             (jtag_debug_slave_readdata),
+      .reset                                (jtag_debug_slave_reset),
+      .reset_n                              (reset_n),
+      .reset_req                            (reset_req),
+      .resetrequest                         (jtag_debug_resetrequest),
+      .test_ending                          (test_ending),
+      .test_has_ended                       (test_has_ended),
+      .waitrequest                          (jtag_debug_slave_waitrequest),
+      .write_nxt                            (jtag_debug_slave_write),
+      .writedata_nxt                        (jtag_debug_slave_writedata)
     );
 
-  //jtag_debug_module, which is an e_avalon_slave
-  assign jtag_debug_module_clk = clk;
-  assign jtag_debug_module_reset = ~reset_n;
+  //jtag_debug_slave, which is an e_avalon_slave
+  assign jtag_debug_slave_clk = clk;
+  assign jtag_debug_slave_reset = ~reset_n;
   assign D_ctrl_custom = 1'b0;
   assign R_ctrl_custom_nxt = D_ctrl_custom;
   always @(posedge clk or negedge reset_n)
@@ -4834,15 +4813,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_jmp_indirect = D_op_eret|
-    D_op_bret|
-    D_op_rsvx17|
-    D_op_rsvx25|
-    D_op_ret|
-    D_op_jmp|
-    D_op_rsvx21|
-    D_op_callr;
-
+  assign D_ctrl_jmp_indirect = D_op_eret|D_op_bret|D_op_ret|D_op_jmp|D_op_callr;
   assign R_ctrl_jmp_indirect_nxt = D_ctrl_jmp_indirect;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4864,7 +4835,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_implicit_dst_retaddr = D_op_call|D_op_rsv02;
+  assign D_ctrl_implicit_dst_retaddr = D_op_call;
   assign R_ctrl_implicit_dst_retaddr_nxt = D_ctrl_implicit_dst_retaddr;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4875,7 +4846,54 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_implicit_dst_eretaddr = D_op_div|D_op_divu|D_op_mul|D_op_muli|D_op_mulxss|D_op_mulxsu|D_op_mulxuu;
+  assign D_ctrl_implicit_dst_eretaddr = D_op_div|
+    D_op_divu|
+    D_op_mul|
+    D_op_muli|
+    D_op_mulxss|
+    D_op_mulxsu|
+    D_op_mulxuu|
+    D_op_crst|
+    D_op_ldl|
+    D_op_op_rsv02|
+    D_op_op_rsv09|
+    D_op_op_rsv10|
+    D_op_op_rsv17|
+    D_op_op_rsv18|
+    D_op_op_rsv25|
+    D_op_op_rsv26|
+    D_op_op_rsv33|
+    D_op_op_rsv34|
+    D_op_op_rsv41|
+    D_op_op_rsv42|
+    D_op_op_rsv49|
+    D_op_op_rsv57|
+    D_op_op_rsv61|
+    D_op_op_rsv62|
+    D_op_op_rsv63|
+    D_op_opx_rsv00|
+    D_op_opx_rsv10|
+    D_op_opx_rsv15|
+    D_op_opx_rsv17|
+    D_op_opx_rsv21|
+    D_op_opx_rsv25|
+    D_op_opx_rsv33|
+    D_op_opx_rsv34|
+    D_op_opx_rsv35|
+    D_op_opx_rsv42|
+    D_op_opx_rsv43|
+    D_op_opx_rsv44|
+    D_op_opx_rsv47|
+    D_op_opx_rsv50|
+    D_op_opx_rsv51|
+    D_op_opx_rsv55|
+    D_op_opx_rsv56|
+    D_op_opx_rsv60|
+    D_op_opx_rsv63|
+    D_op_rdprs|
+    D_op_stc|
+    D_op_wrprs;
+
   assign R_ctrl_implicit_dst_eretaddr_nxt = D_ctrl_implicit_dst_eretaddr;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4887,7 +4905,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
 
   assign D_ctrl_exception = D_op_trap|
-    D_op_rsvx44|
+    D_op_opx_rsv44|
     D_op_div|
     D_op_divu|
     D_op_mul|
@@ -4895,8 +4913,46 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_mulxss|
     D_op_mulxsu|
     D_op_mulxuu|
-    D_op_intr|
-    D_op_rsvx60;
+    D_op_crst|
+    D_op_ldl|
+    D_op_op_rsv02|
+    D_op_op_rsv09|
+    D_op_op_rsv10|
+    D_op_op_rsv17|
+    D_op_op_rsv18|
+    D_op_op_rsv25|
+    D_op_op_rsv26|
+    D_op_op_rsv33|
+    D_op_op_rsv34|
+    D_op_op_rsv41|
+    D_op_op_rsv42|
+    D_op_op_rsv49|
+    D_op_op_rsv57|
+    D_op_op_rsv61|
+    D_op_op_rsv62|
+    D_op_op_rsv63|
+    D_op_opx_rsv00|
+    D_op_opx_rsv10|
+    D_op_opx_rsv15|
+    D_op_opx_rsv17|
+    D_op_opx_rsv21|
+    D_op_opx_rsv25|
+    D_op_opx_rsv33|
+    D_op_opx_rsv34|
+    D_op_opx_rsv35|
+    D_op_opx_rsv42|
+    D_op_opx_rsv43|
+    D_op_opx_rsv47|
+    D_op_opx_rsv50|
+    D_op_opx_rsv51|
+    D_op_opx_rsv55|
+    D_op_opx_rsv56|
+    D_op_opx_rsv60|
+    D_op_opx_rsv63|
+    D_op_rdprs|
+    D_op_stc|
+    D_op_wrprs|
+    D_op_intr;
 
   assign R_ctrl_exception_nxt = D_ctrl_exception;
   always @(posedge clk or negedge reset_n)
@@ -4919,7 +4975,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_crst = D_op_crst|D_op_rsvx63;
+  assign D_ctrl_crst = 1'b0;
   assign R_ctrl_crst_nxt = D_ctrl_crst;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4930,17 +4986,18 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_uncond_cti_non_br = D_op_call|
-    D_op_jmpi|
-    D_op_eret|
-    D_op_bret|
-    D_op_rsvx17|
-    D_op_rsvx25|
-    D_op_ret|
-    D_op_jmp|
-    D_op_rsvx21|
-    D_op_callr;
+  assign D_ctrl_rd_ctl_reg = D_op_rdctl;
+  assign R_ctrl_rd_ctl_reg_nxt = D_ctrl_rd_ctl_reg;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_rd_ctl_reg <= 0;
+      else if (R_en)
+          R_ctrl_rd_ctl_reg <= R_ctrl_rd_ctl_reg_nxt;
+    end
 
+
+  assign D_ctrl_uncond_cti_non_br = D_op_call|D_op_jmpi|D_op_eret|D_op_bret|D_op_ret|D_op_jmp|D_op_callr;
   assign R_ctrl_uncond_cti_non_br_nxt = D_ctrl_uncond_cti_non_br;
   always @(posedge clk or negedge reset_n)
     begin
@@ -4952,11 +5009,11 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
 
   assign D_ctrl_retaddr = D_op_call|
-    D_op_rsv02|
+    D_op_op_rsv02|
     D_op_nextpc|
     D_op_callr|
     D_op_trap|
-    D_op_rsvx44|
+    D_op_opx_rsv44|
     D_op_div|
     D_op_divu|
     D_op_mul|
@@ -4964,8 +5021,45 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_mulxss|
     D_op_mulxsu|
     D_op_mulxuu|
+    D_op_crst|
+    D_op_ldl|
+    D_op_op_rsv09|
+    D_op_op_rsv10|
+    D_op_op_rsv17|
+    D_op_op_rsv18|
+    D_op_op_rsv25|
+    D_op_op_rsv26|
+    D_op_op_rsv33|
+    D_op_op_rsv34|
+    D_op_op_rsv41|
+    D_op_op_rsv42|
+    D_op_op_rsv49|
+    D_op_op_rsv57|
+    D_op_op_rsv61|
+    D_op_op_rsv62|
+    D_op_op_rsv63|
+    D_op_opx_rsv00|
+    D_op_opx_rsv10|
+    D_op_opx_rsv15|
+    D_op_opx_rsv17|
+    D_op_opx_rsv21|
+    D_op_opx_rsv25|
+    D_op_opx_rsv33|
+    D_op_opx_rsv34|
+    D_op_opx_rsv35|
+    D_op_opx_rsv42|
+    D_op_opx_rsv43|
+    D_op_opx_rsv47|
+    D_op_opx_rsv50|
+    D_op_opx_rsv51|
+    D_op_opx_rsv55|
+    D_op_opx_rsv56|
+    D_op_opx_rsv60|
+    D_op_opx_rsv63|
+    D_op_rdprs|
+    D_op_stc|
+    D_op_wrprs|
     D_op_intr|
-    D_op_rsvx60|
     D_op_break|
     D_op_hbreak;
 
@@ -5001,7 +5095,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_rot_right = D_op_rsvx10|D_op_ror|D_op_rsvx42|D_op_rsvx43;
+  assign D_ctrl_rot_right = D_op_ror;
   assign R_ctrl_rot_right_nxt = D_ctrl_rot_right;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5012,15 +5106,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_shift_rot_right = D_op_srli|
-    D_op_srl|
-    D_op_srai|
-    D_op_sra|
-    D_op_rsvx10|
-    D_op_ror|
-    D_op_rsvx42|
-    D_op_rsvx43;
-
+  assign D_ctrl_shift_rot_right = D_op_srli|D_op_srl|D_op_srai|D_op_sra|D_op_ror;
   assign R_ctrl_shift_rot_right_nxt = D_ctrl_shift_rot_right;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5032,21 +5118,14 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
 
   assign D_ctrl_shift_rot = D_op_slli|
-    D_op_rsvx50|
     D_op_sll|
-    D_op_rsvx51|
     D_op_roli|
-    D_op_rsvx34|
     D_op_rol|
-    D_op_rsvx35|
     D_op_srli|
     D_op_srl|
     D_op_srai|
     D_op_sra|
-    D_op_rsvx10|
-    D_op_ror|
-    D_op_rsvx42|
-    D_op_rsvx43;
+    D_op_ror;
 
   assign R_ctrl_shift_rot_nxt = D_ctrl_shift_rot;
   always @(posedge clk or negedge reset_n)
@@ -5090,18 +5169,25 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
+  assign D_ctrl_set_src2_rem_imm = 1'b0;
+  assign R_ctrl_set_src2_rem_imm_nxt = D_ctrl_set_src2_rem_imm;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_set_src2_rem_imm <= 0;
+      else if (R_en)
+          R_ctrl_set_src2_rem_imm <= R_ctrl_set_src2_rem_imm_nxt;
+    end
+
+
   assign D_ctrl_unsigned_lo_imm16 = D_op_cmpgeui|
     D_op_cmpltui|
     D_op_andi|
     D_op_ori|
     D_op_xori|
     D_op_roli|
-    D_op_rsvx10|
     D_op_slli|
     D_op_srli|
-    D_op_rsvx34|
-    D_op_rsvx42|
-    D_op_rsvx50|
     D_op_srai;
 
   assign R_ctrl_unsigned_lo_imm16_nxt = D_ctrl_unsigned_lo_imm16;
@@ -5114,7 +5200,29 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_br_uncond = D_op_br|D_op_rsv02;
+  assign D_ctrl_signed_imm12 = 1'b0;
+  assign R_ctrl_signed_imm12_nxt = D_ctrl_signed_imm12;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_signed_imm12 <= 0;
+      else if (R_en)
+          R_ctrl_signed_imm12 <= R_ctrl_signed_imm12_nxt;
+    end
+
+
+  assign D_ctrl_src_imm5_shift_rot = D_op_roli|D_op_slli|D_op_srli|D_op_srai;
+  assign R_ctrl_src_imm5_shift_rot_nxt = D_ctrl_src_imm5_shift_rot;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_src_imm5_shift_rot <= 0;
+      else if (R_en)
+          R_ctrl_src_imm5_shift_rot <= R_ctrl_src_imm5_shift_rot_nxt;
+    end
+
+
+  assign D_ctrl_br_uncond = D_op_br;
   assign R_ctrl_br_uncond_nxt = D_ctrl_br_uncond;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5125,15 +5233,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_br = D_op_br|
-    D_op_bge|
-    D_op_blt|
-    D_op_bne|
-    D_op_beq|
-    D_op_bgeu|
-    D_op_bltu|
-    D_op_rsv62;
-
+  assign D_ctrl_br = D_op_br|D_op_bge|D_op_blt|D_op_bne|D_op_beq|D_op_bgeu|D_op_bltu;
   assign R_ctrl_br_nxt = D_ctrl_br;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5145,7 +5245,6 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
 
   assign D_ctrl_alu_subtract = D_op_sub|
-    D_op_rsvx25|
     D_op_cmplti|
     D_op_cmpltui|
     D_op_cmplt|
@@ -5157,9 +5256,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_cmpge|
     D_op_cmpgeu|
     D_op_bge|
-    D_op_rsv10|
-    D_op_bgeu|
-    D_op_rsv42;
+    D_op_bgeu;
 
   assign R_ctrl_alu_subtract_nxt = D_ctrl_alu_subtract;
   always @(posedge clk or negedge reset_n)
@@ -5189,21 +5286,18 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_beq|
     D_op_bgeu|
     D_op_bltu|
-    D_op_rsv62|
     D_op_cmpgei|
     D_op_cmplti|
     D_op_cmpnei|
     D_op_cmpgeui|
     D_op_cmpltui|
     D_op_cmpeqi|
-    D_op_rsvx00|
     D_op_cmpge|
     D_op_cmplt|
     D_op_cmpne|
     D_op_cmpgeu|
     D_op_cmpltu|
-    D_op_cmpeq|
-    D_op_rsvx56;
+    D_op_cmpeq;
 
   assign R_ctrl_br_cmp_nxt = D_ctrl_br_cmp;
   always @(posedge clk or negedge reset_n)
@@ -5215,15 +5309,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_ld_signed = D_op_ldb|
-    D_op_ldh|
-    D_op_ldl|
-    D_op_ldw|
-    D_op_ldbio|
-    D_op_ldhio|
-    D_op_ldwio|
-    D_op_rsv63;
-
+  assign D_ctrl_ld_signed = D_op_ldb|D_op_ldh|D_op_ldw|D_op_ldbio|D_op_ldhio|D_op_ldwio;
   assign R_ctrl_ld_signed_nxt = D_ctrl_ld_signed;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5236,12 +5322,10 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
 
   assign D_ctrl_ld = D_op_ldb|
     D_op_ldh|
-    D_op_ldl|
     D_op_ldw|
     D_op_ldbio|
     D_op_ldhio|
     D_op_ldwio|
-    D_op_rsv63|
     D_op_ldbu|
     D_op_ldhu|
     D_op_ldbuio|
@@ -5257,7 +5341,18 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_ld_non_io = D_op_ldbu|D_op_ldhu|D_op_ldb|D_op_ldh|D_op_ldw|D_op_ldl;
+  assign D_ctrl_ld_ex = 1'b0;
+  assign R_ctrl_ld_ex_nxt = D_ctrl_ld_ex;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_ld_ex <= 0;
+      else if (R_en)
+          R_ctrl_ld_ex <= R_ctrl_ld_ex_nxt;
+    end
+
+
+  assign D_ctrl_ld_non_io = D_op_ldbu|D_op_ldhu|D_op_ldb|D_op_ldh|D_op_ldw;
   assign R_ctrl_ld_non_io_nxt = D_ctrl_ld_non_io;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5268,15 +5363,18 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_st = D_op_stb|
-    D_op_sth|
-    D_op_stw|
-    D_op_stc|
-    D_op_stbio|
-    D_op_sthio|
-    D_op_stwio|
-    D_op_rsv61;
+  assign D_ctrl_st_ex = 1'b0;
+  assign R_ctrl_st_ex_nxt = D_ctrl_st_ex;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_st_ex <= 0;
+      else if (R_en)
+          R_ctrl_st_ex <= R_ctrl_st_ex_nxt;
+    end
 
+
+  assign D_ctrl_st = D_op_stb|D_op_sth|D_op_stw|D_op_stbio|D_op_sthio|D_op_stwio;
   assign R_ctrl_st_nxt = D_ctrl_st;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5287,7 +5385,51 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_ld_io = D_op_ldbuio|D_op_ldhuio|D_op_ldbio|D_op_ldhio|D_op_ldwio|D_op_rsv63;
+  assign D_ctrl_ld_st_ex = 1'b0;
+  assign R_ctrl_ld_st_ex_nxt = D_ctrl_ld_st_ex;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_ld_st_ex <= 0;
+      else if (R_en)
+          R_ctrl_ld_st_ex <= R_ctrl_ld_st_ex_nxt;
+    end
+
+
+  assign D_ctrl_mem8 = D_op_ldb|D_op_ldbu|D_op_ldbio|D_op_ldbuio|D_op_stb|D_op_stbio;
+  assign R_ctrl_mem8_nxt = D_ctrl_mem8;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_mem8 <= 0;
+      else if (R_en)
+          R_ctrl_mem8 <= R_ctrl_mem8_nxt;
+    end
+
+
+  assign D_ctrl_mem16 = D_op_ldhu|D_op_ldh|D_op_ldhio|D_op_ldhuio|D_op_sth|D_op_sthio;
+  assign R_ctrl_mem16_nxt = D_ctrl_mem16;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_mem16 <= 0;
+      else if (R_en)
+          R_ctrl_mem16 <= R_ctrl_mem16_nxt;
+    end
+
+
+  assign D_ctrl_mem32 = D_op_ldw|D_op_ldwio|D_op_stw|D_op_stwio;
+  assign R_ctrl_mem32_nxt = D_ctrl_mem32;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_mem32 <= 0;
+      else if (R_en)
+          R_ctrl_mem32 <= R_ctrl_mem32_nxt;
+    end
+
+
+  assign D_ctrl_ld_io = D_op_ldbuio|D_op_ldhuio|D_op_ldbio|D_op_ldhio|D_op_ldwio;
   assign R_ctrl_ld_io_nxt = D_ctrl_ld_io;
   always @(posedge clk or negedge reset_n)
     begin
@@ -5306,7 +5448,6 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_ori|
     D_op_xori|
     D_op_call|
-    D_op_rdprs|
     D_op_cmpgei|
     D_op_cmplti|
     D_op_cmpnei|
@@ -5314,21 +5455,12 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_cmpltui|
     D_op_cmpeqi|
     D_op_jmpi|
-    D_op_rsv09|
-    D_op_rsv17|
-    D_op_rsv25|
-    D_op_rsv33|
-    D_op_rsv41|
-    D_op_rsv49|
-    D_op_rsv57|
     D_op_ldb|
     D_op_ldh|
-    D_op_ldl|
     D_op_ldw|
     D_op_ldbio|
     D_op_ldhio|
     D_op_ldwio|
-    D_op_rsv63|
     D_op_ldbu|
     D_op_ldhu|
     D_op_ldbuio|
@@ -5355,23 +5487,13 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_beq|
     D_op_bgeu|
     D_op_bltu|
-    D_op_rsv62|
     D_op_stb|
     D_op_sth|
     D_op_stw|
-    D_op_stc|
     D_op_stbio|
     D_op_sthio|
     D_op_stwio|
-    D_op_rsv61|
-    D_op_jmpi|
-    D_op_rsv09|
-    D_op_rsv17|
-    D_op_rsv25|
-    D_op_rsv33|
-    D_op_rsv41|
-    D_op_rsv49|
-    D_op_rsv57;
+    D_op_jmpi;
 
   assign R_ctrl_ignore_dst_nxt = D_ctrl_ignore_dst;
   always @(posedge clk or negedge reset_n)
@@ -5391,7 +5513,6 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_ori|
     D_op_xori|
     D_op_call|
-    D_op_rdprs|
     D_op_cmpgei|
     D_op_cmplti|
     D_op_cmpnei|
@@ -5399,21 +5520,12 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_cmpltui|
     D_op_cmpeqi|
     D_op_jmpi|
-    D_op_rsv09|
-    D_op_rsv17|
-    D_op_rsv25|
-    D_op_rsv33|
-    D_op_rsv41|
-    D_op_rsv49|
-    D_op_rsv57|
     D_op_ldb|
     D_op_ldh|
-    D_op_ldl|
     D_op_ldw|
     D_op_ldbio|
     D_op_ldhio|
     D_op_ldwio|
-    D_op_rsv63|
     D_op_ldbu|
     D_op_ldhu|
     D_op_ldbuio|
@@ -5425,18 +5537,12 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_stb|
     D_op_sth|
     D_op_stw|
-    D_op_stc|
     D_op_stbio|
     D_op_sthio|
     D_op_stwio|
-    D_op_rsv61|
     D_op_roli|
-    D_op_rsvx10|
     D_op_slli|
     D_op_srli|
-    D_op_rsvx34|
-    D_op_rsvx42|
-    D_op_rsvx50|
     D_op_srai;
 
   assign R_ctrl_src2_choose_imm_nxt = D_ctrl_src2_choose_imm;
@@ -5460,34 +5566,68 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     end
 
 
-  assign D_ctrl_rdctl_inst = D_op_rdctl;
-  assign R_ctrl_rdctl_inst_nxt = D_ctrl_rdctl_inst;
+  assign D_ctrl_intr_inst = 1'b0;
+  assign R_ctrl_intr_inst_nxt = D_ctrl_intr_inst;
   always @(posedge clk or negedge reset_n)
     begin
       if (reset_n == 0)
-          R_ctrl_rdctl_inst <= 0;
+          R_ctrl_intr_inst <= 0;
       else if (R_en)
-          R_ctrl_rdctl_inst <= R_ctrl_rdctl_inst_nxt;
+          R_ctrl_intr_inst <= R_ctrl_intr_inst_nxt;
     end
 
 
   assign D_ctrl_force_src2_zero = D_op_call|
-    D_op_rsv02|
+    D_op_op_rsv02|
     D_op_nextpc|
     D_op_callr|
     D_op_trap|
-    D_op_rsvx44|
+    D_op_opx_rsv44|
+    D_op_crst|
+    D_op_ldl|
+    D_op_op_rsv09|
+    D_op_op_rsv10|
+    D_op_op_rsv17|
+    D_op_op_rsv18|
+    D_op_op_rsv25|
+    D_op_op_rsv26|
+    D_op_op_rsv33|
+    D_op_op_rsv34|
+    D_op_op_rsv41|
+    D_op_op_rsv42|
+    D_op_op_rsv49|
+    D_op_op_rsv57|
+    D_op_op_rsv61|
+    D_op_op_rsv62|
+    D_op_op_rsv63|
+    D_op_opx_rsv00|
+    D_op_opx_rsv10|
+    D_op_opx_rsv15|
+    D_op_opx_rsv17|
+    D_op_opx_rsv21|
+    D_op_opx_rsv25|
+    D_op_opx_rsv33|
+    D_op_opx_rsv34|
+    D_op_opx_rsv35|
+    D_op_opx_rsv42|
+    D_op_opx_rsv43|
+    D_op_opx_rsv47|
+    D_op_opx_rsv50|
+    D_op_opx_rsv51|
+    D_op_opx_rsv55|
+    D_op_opx_rsv56|
+    D_op_opx_rsv60|
+    D_op_opx_rsv63|
+    D_op_rdprs|
+    D_op_stc|
+    D_op_wrprs|
     D_op_intr|
-    D_op_rsvx60|
     D_op_break|
     D_op_hbreak|
     D_op_eret|
     D_op_bret|
-    D_op_rsvx17|
-    D_op_rsvx25|
     D_op_ret|
     D_op_jmp|
-    D_op_rsvx21|
     D_op_jmpi;
 
   assign R_ctrl_force_src2_zero_nxt = D_ctrl_force_src2_zero;
@@ -5509,15 +5649,10 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     D_op_cmpnei|
     D_op_cmpne|
     D_op_bge|
-    D_op_rsv10|
     D_op_bgeu|
-    D_op_rsv42|
     D_op_beq|
-    D_op_rsv34|
     D_op_bne|
-    D_op_rsv62|
-    D_op_br|
-    D_op_rsv02;
+    D_op_br;
 
   assign R_ctrl_alu_force_xor_nxt = D_ctrl_alu_force_xor;
   always @(posedge clk or negedge reset_n)
@@ -5526,6 +5661,17 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
           R_ctrl_alu_force_xor <= 0;
       else if (R_en)
           R_ctrl_alu_force_xor <= R_ctrl_alu_force_xor_nxt;
+    end
+
+
+  assign D_ctrl_alu_force_and = 1'b0;
+  assign R_ctrl_alu_force_and_nxt = D_ctrl_alu_force_and;
+  always @(posedge clk or negedge reset_n)
+    begin
+      if (reset_n == 0)
+          R_ctrl_alu_force_and <= 0;
+      else if (R_en)
+          R_ctrl_alu_force_and <= R_ctrl_alu_force_and_nxt;
     end
 
 
@@ -5570,6 +5716,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     (F_op_bgeu)? 56'h20202062676575 :
     (F_op_ldhio)? 56'h20206c6468696f :
     (F_op_cmpltui)? 56'h636d706c747569 :
+    (F_op_custom)? 56'h20637573746f6d :
     (F_op_initd)? 56'h2020696e697464 :
     (F_op_orhi)? 56'h2020206f726869 :
     (F_op_stwio)? 56'h2020737477696f :
@@ -5658,6 +5805,7 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     (D_op_bgeu)? 56'h20202062676575 :
     (D_op_ldhio)? 56'h20206c6468696f :
     (D_op_cmpltui)? 56'h636d706c747569 :
+    (D_op_custom)? 56'h20637573746f6d :
     (D_op_initd)? 56'h2020696e697464 :
     (D_op_orhi)? 56'h2020206f726869 :
     (D_op_stwio)? 56'h2020737477696f :
@@ -5710,11 +5858,11 @@ defparam nios_system_nios2_qsys_0_register_bank_b.lpm_file = "nios_system_nios2_
     (D_op_intr)? 56'h202020696e7472 :
     56'h20202020424144;
 
-  assign F_vinst = F_valid ? F_inst : {7{8'h2d}};
-  assign D_vinst = D_valid ? D_inst : {7{8'h2d}};
-  assign R_vinst = R_valid ? D_inst : {7{8'h2d}};
-  assign E_vinst = E_valid ? D_inst : {7{8'h2d}};
-  assign W_vinst = W_valid ? D_inst : {7{8'h2d}};
+  assign F_vinst = F_valid ? F_inst : {9{8'h2d}};
+  assign D_vinst = D_valid ? D_inst : {9{8'h2d}};
+  assign R_vinst = R_valid ? D_inst : {9{8'h2d}};
+  assign E_vinst = E_valid ? D_inst : {9{8'h2d}};
+  assign W_vinst = W_valid ? D_inst : {9{8'h2d}};
 
 //////////////// END SIMULATION-ONLY CONTENTS
 

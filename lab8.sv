@@ -48,7 +48,7 @@ module  lab8 		( input         CLOCK_50,
     logic Reset_h, vssig, Clk;
     logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig;
 	 logic [15:0] keycode;
-    
+    assign vssig = VGA_VS;
 	 assign Clk = CLOCK_50;
     assign {Reset_h}=~ (KEY[0]);  // The push buttons are active low
 	
@@ -75,7 +75,7 @@ module  lab8 		( input         CLOCK_50,
 	 );
 	 
 	 //The connections for nios_system might be named different depending on how you set up Qsys
-	 lab7_soc nios_system(
+	 nios_system nios_system(
 										 .clk_clk(Clk),         
 										 .reset_reset_n(KEY[0]),   
 										 .sdram_wire_addr(DRAM_ADDR), 
@@ -97,11 +97,38 @@ module  lab8 		( input         CLOCK_50,
 										 .otg_hpi_w_export(hpi_w));
 	
 	//Fill in the connections for the rest of the modules 
-    vga_controller vgasync_instance();
+    vga_controller vgasync_instance( 
+	 .Clk(Clk), 
+	 .Reset(Reset_h), 
+	 .hs(VGA_HS),
+	 .vs(VGA_VS),
+	 .pixel_clk(VGA_CLK),
+	 .blank(VGA_BLANK_N),
+	 .DrawX(drawxsig),
+	 .DrawY(drawysig)	 
+	 );
    
-    ball ball_instance();
+    ball ball_instance(
+	 .Reset(Reset_h),
+	 .frame_clk(vssig),
+	 .BallX(ballxsig),
+	 .BallY(ballysig),
+	 .BallS(ballsizesig),
+	 .keycode(keycode[7:0])
+	
+	 );
    
-    color_mapper color_instance();
+    color_mapper color_instance(
+	 .BallX(ballxsig),
+	 .BallY(ballysig),
+	 .DrawX(drawxsig),
+	 .DrawY(drawysig),
+	 .Ball_size(ballsizesig),
+	 .Red(VGA_R),
+	 .Blue(VGA_B),
+	 .Green(VGA_G)
+	 
+	 );
 										  
 	 HexDriver hex_inst_0 (keycode[3:0], HEX0);
 	 HexDriver hex_inst_1 (keycode[7:4], HEX1);

@@ -1,4 +1,4 @@
-//Legal Notice: (C)2016 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2015 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -250,7 +250,7 @@ module lab7_soc_sdram (
   wire             pending;
   wire             rd_strobe;
   reg     [  2: 0] rd_valid;
-  reg     [ 13: 0] refresh_counter;
+  reg     [ 12: 0] refresh_counter;
   reg              refresh_request;
   wire             rnw_match;
   wire             row_match;
@@ -300,9 +300,9 @@ module lab7_soc_sdram (
   always @(posedge clk or negedge reset_n)
     begin
       if (reset_n == 0)
-          refresh_counter <= 10000;
+          refresh_counter <= 5000;
       else if (refresh_counter == 0)
-          refresh_counter <= 390;
+          refresh_counter <= 781;
       else 
         refresh_counter <= refresh_counter - 1'b1;
     end

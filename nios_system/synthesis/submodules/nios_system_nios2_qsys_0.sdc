@@ -1,4 +1,4 @@
-# Legal Notice: (C)2016 Altera Corporation. All rights reserved.  Your
+# Legal Notice: (C)2015 Altera Corporation. All rights reserved.  Your
 # use of Altera Corporation's design tools, logic functions and other
 # software and tools, and its AMPP partner logic functions, and any
 # output files any of the foregoing (including device programming or
@@ -28,9 +28,9 @@ set 	nios_system_nios2_qsys_0_oci 	nios_system_nios2_qsys_0_nios2_oci:the_nios_s
 set 	nios_system_nios2_qsys_0_oci_break 	nios_system_nios2_qsys_0_nios2_oci_break:the_nios_system_nios2_qsys_0_nios2_oci_break
 set 	nios_system_nios2_qsys_0_ocimem 	nios_system_nios2_qsys_0_nios2_ocimem:the_nios_system_nios2_qsys_0_nios2_ocimem
 set 	nios_system_nios2_qsys_0_oci_debug 	nios_system_nios2_qsys_0_nios2_oci_debug:the_nios_system_nios2_qsys_0_nios2_oci_debug
-set 	nios_system_nios2_qsys_0_wrapper 	nios_system_nios2_qsys_0_jtag_debug_module_wrapper:the_nios_system_nios2_qsys_0_jtag_debug_module_wrapper
-set 	nios_system_nios2_qsys_0_jtag_tck 	nios_system_nios2_qsys_0_jtag_debug_module_tck:the_nios_system_nios2_qsys_0_jtag_debug_module_tck
-set 	nios_system_nios2_qsys_0_jtag_sysclk 	nios_system_nios2_qsys_0_jtag_debug_module_sysclk:the_nios_system_nios2_qsys_0_jtag_debug_module_sysclk
+set 	nios_system_nios2_qsys_0_wrapper 	nios_system_nios2_qsys_0_jtag_debug_slave_wrapper:the_nios_system_nios2_qsys_0_jtag_debug_slave_wrapper
+set 	nios_system_nios2_qsys_0_jtag_tck 	nios_system_nios2_qsys_0_jtag_debug_slave_tck:the_nios_system_nios2_qsys_0_jtag_debug_slave_tck
+set 	nios_system_nios2_qsys_0_jtag_sysclk 	nios_system_nios2_qsys_0_jtag_debug_slave_sysclk:the_nios_system_nios2_qsys_0_jtag_debug_slave_sysclk
 set 	nios_system_nios2_qsys_0_oci_path 	 [format "%s|%s" $nios_system_nios2_qsys_0 $nios_system_nios2_qsys_0_oci]
 set 	nios_system_nios2_qsys_0_oci_break_path 	 [format "%s|%s" $nios_system_nios2_qsys_0_oci_path $nios_system_nios2_qsys_0_oci_break]
 set 	nios_system_nios2_qsys_0_ocimem_path 	 [format "%s|%s" $nios_system_nios2_qsys_0_oci_path $nios_system_nios2_qsys_0_ocimem]

@@ -1,4 +1,4 @@
-//Legal Notice: (C)2016 Altera Corporation. All rights reserved.  Your
+//Legal Notice: (C)2015 Altera Corporation. All rights reserved.  Your
 //use of Altera Corporation's design tools, logic functions and other
 //software and tools, and its AMPP partner logic functions, and any
 //output files any of the foregoing (including device programming or
@@ -186,7 +186,7 @@ module nios_system_sdram (
   output           za_valid;
   output           za_waitrequest;
   output  [ 12: 0] zs_addr;
-  output           zs_ba;
+  output  [  1: 0] zs_ba;
   output           zs_cas_n;
   output           zs_cke;
   output           zs_cs_n;
@@ -206,7 +206,7 @@ module nios_system_sdram (
   wire    [ 23: 0] CODE;
   reg              ack_refresh_request;
   reg     [ 24: 0] active_addr;
-  wire             active_bank;
+  wire    [  1: 0] active_bank;
   reg              active_cs_n;
   reg     [ 31: 0] active_data;
   reg     [  3: 0] active_dqm;
@@ -214,7 +214,7 @@ module nios_system_sdram (
   wire             almost_empty;
   wire             almost_full;
   wire             bank_match;
-  wire    [ 11: 0] cas_addr;
+  wire    [  9: 0] cas_addr;
   wire             clk_en;
   wire    [  3: 0] cmd_all;
   wire    [  2: 0] cmd_code;
@@ -222,7 +222,7 @@ module nios_system_sdram (
   wire             csn_decode;
   wire             csn_match;
   wire    [ 24: 0] f_addr;
-  wire             f_bank;
+  wire    [  1: 0] f_bank;
   wire             f_cs_n;
   wire    [ 31: 0] f_data;
   wire    [  3: 0] f_dqm;
@@ -239,7 +239,7 @@ module nios_system_sdram (
   reg     [  2: 0] i_state;
   reg              init_done;
   reg     [ 12: 0] m_addr /* synthesis ALTERA_ATTRIBUTE = "FAST_OUTPUT_REGISTER=ON"  */;
-  reg              m_bank /* synthesis ALTERA_ATTRIBUTE = "FAST_OUTPUT_REGISTER=ON"  */;
+  reg     [  1: 0] m_bank /* synthesis ALTERA_ATTRIBUTE = "FAST_OUTPUT_REGISTER=ON"  */;
   reg     [  3: 0] m_cmd /* synthesis ALTERA_ATTRIBUTE = "FAST_OUTPUT_REGISTER=ON"  */;
   reg     [  2: 0] m_count;
   reg     [ 31: 0] m_data /* synthesis ALTERA_ATTRIBUTE = "FAST_OUTPUT_REGISTER=ON ; FAST_OUTPUT_ENABLE_REGISTER=ON"  */;
@@ -250,7 +250,7 @@ module nios_system_sdram (
   wire             pending;
   wire             rd_strobe;
   reg     [  2: 0] rd_valid;
-  reg     [ 13: 0] refresh_counter;
+  reg     [ 12: 0] refresh_counter;
   reg              refresh_request;
   wire             rnw_match;
   wire             row_match;
@@ -260,7 +260,7 @@ module nios_system_sdram (
   reg              za_valid;
   wire             za_waitrequest;
   wire    [ 12: 0] zs_addr;
-  wire             zs_ba;
+  wire    [  1: 0] zs_ba;
   wire             zs_cas_n;
   wire             zs_cke;
   wire             zs_cs_n;
@@ -295,14 +295,14 @@ module nios_system_sdram (
       .wr_data      ({az_wr_n, az_addr, az_wr_n ? 4'b0 : az_be_n, az_data})
     );
 
-  assign f_bank = f_addr[11];
+  assign f_bank = {f_addr[24],f_addr[10]};
   // Refresh/init counter.
   always @(posedge clk or negedge reset_n)
     begin
       if (reset_n == 0)
-          refresh_counter <= 10000;
+          refresh_counter <= 5000;
       else if (refresh_counter == 0)
-          refresh_counter <= 390;
+          refresh_counter <= 781;
       else 
         refresh_counter <= refresh_counter - 1'b1;
     end
@@ -411,13 +411,13 @@ module nios_system_sdram (
     end
 
 
-  assign active_bank = active_addr[11];
+  assign active_bank = {active_addr[24],active_addr[10]};
   assign csn_match = active_cs_n == f_cs_n;
   assign rnw_match = active_rnw == f_rnw;
   assign bank_match = active_bank == f_bank;
-  assign row_match = {active_addr[24 : 12]} == {f_addr[24 : 12]};
+  assign row_match = {active_addr[23 : 11]} == {f_addr[23 : 11]};
   assign pending = csn_match && rnw_match && bank_match && row_match && !f_empty;
-  assign cas_addr = f_select ? {1'b0, f_addr[10],1'b0,f_addr[9 : 0] } : {1'b0, active_addr[10],1'b0,active_addr[9 : 0] };
+  assign cas_addr = f_select ? { {3{1'b0}},f_addr[9 : 0] } : { {3{1'b0}},active_addr[9 : 0] };
   // **** Main FSM ****
   always @(posedge clk or negedge reset_n)
     begin
@@ -426,7 +426,7 @@ module nios_system_sdram (
           m_state <= 9'b000000001;
           m_next <= 9'b000000001;
           m_cmd <= 4'b1111;
-          m_bank <= 1'b0;
+          m_bank <= 2'b00;
           m_addr <= 13'b0000000000000;
           m_data <= 32'b00000000000000000000000000000000;
           m_dqm <= 4'b0000;
@@ -483,7 +483,7 @@ module nios_system_sdram (
                   m_state <= 9'b000000100;
                   m_cmd <= {csn_decode,3'h3};
                   m_bank <= active_bank;
-                  m_addr <= active_addr[24 : 12];
+                  m_addr <= active_addr[23 : 11];
                   m_data <= active_data;
                   m_dqm <= active_dqm;
                   m_count <= 1;
